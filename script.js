@@ -1,18 +1,4 @@
 $(document).ready(function() {
-    $('#loginForm').submit(function(e) {
-        e.preventDefault();
-        var email = $('#email').val();
-        var password = $('#password').val();
-
-        // Test login check
-        if (email === 'user' && password === 'pass') {
-            alert('Login successful!');
-            // Can redirect if needed
-        } else {
-            $('#error-message').text('Invalid email or password');
-        }
-    });
-
     $('#accountCreationForm').submit(function(e) {
         e.preventDefault();
         
@@ -32,10 +18,8 @@ $(document).ready(function() {
             $('#creation-error-message').text('Email must end with @uncg.edu');
             return;
         }
-        // Here you can perform additional validation like checking username uniqueness, password strength, etc.
+        // can perform more validation like checking username uniqueness, password strength, etc.
 
-        // If all validation passes, you can proceed with account creation
-        alert('Account created successfully!');
-        // Can redirect the user to the login page after successful account creation
+        window.location.href = "login.html";
     });
 });
