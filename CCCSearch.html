@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Job Posts</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,19 +19,28 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .search-button, .filter-button {
+        .search-button, .filter-button, .apply-filters-button {
             padding: 10px 20px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-right: 10px;
         }
         .filter-button {
             background-color: #28a745;
         }
-        .search-button:hover, .filter-button:hover {
+        .search-button:hover, .filter-button:hover, .apply-filters-button:hover {
             opacity: 0.9;
+        }
+        #filter-options {
+            display: none;
+            margin-top: 20px;
+        }
+        #filter-options label,
+        #filter-options select {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -44,12 +52,30 @@
     <button class="filter-button" onclick="toggleFilters()">Filters</button>
 </div>
 
-<div id="search-results"></div>
-
-<div id="filter-options" style="display: none;">
-    <!-- Filter options go here -->
+<div id="filter-options">
+    <label for="jobType">Job Type:</label>
+    <select id="jobType">
+        <option value="all">All</option>
+        <option value="full-time">Full-Time</option>
+        <option value="part-time">Part-Time</option>
+        <option value="contract">Contract</option>
+        <option value="internship">Internship</option>
+    </select>
+    
+    <label for="experienceLevel">Experience Level:</label>
+    <select id="experienceLevel">
+        <option value="all">All</option>
+        <option value="entry">Entry Level</option>
+        <option value="mid">Mid Level</option>
+        <option value="senior">Senior Level</option>
+    </select>
+    
+    <button class="apply-filters-button">Apply Filters</button>
 </div>
 
+<div id="search-results"></div>
+
 <script src="script.js"></script> <!-- Link to your external JS file -->
+
 </body>
 </html>
