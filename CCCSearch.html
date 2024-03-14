@@ -1,10 +1,10 @@
-@@ -0,0 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Job Posts</title>
+    <link rel="stylesheet" href="style.css"> <!-- If you have an external CSS file -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,31 +40,16 @@
 
 <div class="search-container">
     <input type="text" class="search-input" placeholder="Search job posts...">
-    <button class="search-button" onclick="searchPosts()">Search</button>
+    <button class="search-button">Search</button>
     <button class="filter-button" onclick="toggleFilters()">Filters</button>
 </div>
 
 <div id="search-results"></div>
 
 <div id="filter-options" style="display: none;">
+    <!-- Filter options go here -->
 </div>
 
-<script>
-    function searchPosts() {
-        // Implement search functionality
-        alert("Search functionality not implemented.");
-    }
-
-    function toggleFilters() {
-        // Implement filter toggle
-        var filterOptions = document.getElementById("filter-options");
-        if (filterOptions.style.display === "none") {
-            filterOptions.style.display = "block";
-        } else {
-            filterOptions.style.display = "none";
-        }
-    }
-</script>
-
+<script src="script.js"></script> <!-- Link to your external JS file -->
 </body>
 </html>

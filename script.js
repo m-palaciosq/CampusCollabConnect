@@ -43,3 +43,39 @@ $(document).ready(function() {
         $('#create-project-form')[0].reset(); // Clear form data
     });
 });
+$(document).ready(function() {
+    // Existing account creation and project submission logic
+
+    // Placeholder job posts array
+    let jobPosts = [
+        { title: "Web Developer", description: "Experience in JavaScript and PHP required." },
+        { title: "Graphic Designer", description: "Looking for a creative graphic designer." },
+        // Add more job posts as needed
+    ];
+
+    // Search functionality
+    $('.search-button').click(function() {
+        let searchTerm = $('.search-input').val().toLowerCase();
+        let searchResults = $('#search-results');
+
+        // Clear previous results
+        searchResults.empty();
+
+        // Filter job posts based on search term
+        let filteredPosts = jobPosts.filter(post => 
+            post.title.toLowerCase().includes(searchTerm) || 
+            post.description.toLowerCase().includes(searchTerm)
+        );
+
+        // Display results
+        if (filteredPosts.length) {
+            filteredPosts.forEach(post => {
+                searchResults.append('<div><h4>' + post.title + '</h4><p>' + post.description + '</p></div>');
+            });
+        } else {
+            searchResults.append('<p>No results found.</p>');
+        }
+    });
+
+    // Existing toggleFilters function
+});
