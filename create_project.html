@@ -1,0 +1,53 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Project - Campus, Collab, Connect</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="create_project.html">Create Project</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <div class="container">
+                <h1>Create a New Project</h1>
+                <form id="create-project-form">
+                    <label for="project-title">Project Title:</label>
+                    <input type="text" id="project-title" name="project-title" required>
+                    
+                    <label for="project-description">Project Description:</label>
+                    <textarea id="project-description" name="project-description" required></textarea>
+                    
+                    <label for="task-outline">Task Outline:</label>
+                    <textarea id="task-outline" name="task-outline" required></textarea>
+                    
+                    <label for="research-requirements">Research Requirements:</label>
+                    <textarea id="research-requirements" name="research-requirements"></textarea>
+                    
+                    <label for="collaborators">Collaborators:</label>
+                    <input type="text" id="collaborators" name="collaborators">
+                    
+                    <button type="submit">Create Project</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Campus, Collab, Connect</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
