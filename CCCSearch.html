@@ -46,24 +46,65 @@
 <div id="search-results"></div>
 
 <div id="filter-options" style="display: none;">
+    <label for="jobType">Job Type:</label>
+    <select id="jobType">
+        <option value="all">All</option>
+        <option value="full-time">Full-Time</option>
+        <option value="part-time">Part-Time</option>
+        <option value="contract">Contract</option>
+        <option value="internship">Internship</option>
+    </select>
+    
+    <label for="experienceLevel">Experience Level:</label>
+    <select id="experienceLevel">
+        <option value="all">All</option>
+        <option value="entry">Entry Level</option>
+        <option value="mid">Mid Level</option>
+        <option value="senior">Senior Level</option>
+    </select>
+    
+    <button onclick="searchPosts()">Apply Filters</button>
 </div>
 
 <script>
+    let jobPosts = [
+        { title: "Web Developer", description: "Experience in JavaScript required.", jobType: "full-time", experienceLevel: "mid" },
+        { title: "Graphic Designer", description: "Looking for a creative individual with experience in Adobe Suite.", jobType: "contract", experienceLevel: "senior" },
+        { title: "Data Analyst", description: "Must know Python and SQL.", jobType: "part-time", experienceLevel: "entry" },
+        // Add more job posts as needed
+    ];
+    
     function searchPosts() {
-        // Implement search functionality
-        alert("Search functionality not implemented.");
-    }
-
-    function toggleFilters() {
-        // Implement filter toggle
-        var filterOptions = document.getElementById("filter-options");
-        if (filterOptions.style.display === "none") {
-            filterOptions.style.display = "block";
-        } else {
-            filterOptions.style.display = "none";
+        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+        const jobType = document.querySelector('#jobType').value;
+        const experienceLevel = document.querySelector('#experienceLevel').value;
+        const searchResults = document.getElementById('search-results');
+    
+        // Clear previous results
+        searchResults.innerHTML = '';
+    
+        // Filter and display job posts
+        jobPosts.filter(post => {
+            return (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm)) &&
+                   (jobType === 'all' || post.jobType === jobType) &&
+                   (experienceLevel === 'all' || post.experienceLevel === experienceLevel);
+        }).forEach(post => {
+            const postElement = document.createElement('div');
+            postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
+            searchResults.appendChild(postElement);
+        });
+    
+        if (searchResults.innerHTML === '') {
+            searchResults.innerHTML = '<p>No results found.</p>';
         }
     }
-</script>
+    
+    function toggleFilters() {
+        var filterOptions = document.getElementById("filter-options");
+        filterOptions.style.display = filterOptions.style.display === "none" ? "block" : "none";
+    }
+    </script>
+    
 
 </body>
 </html>
