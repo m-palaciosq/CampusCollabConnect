@@ -66,6 +66,9 @@
     <button onclick="searchPosts()">Apply Filters</button>
 </div>
 
+<a href="CCCDashboard.html" class="back-button">Back to Dashboard</a>
+
+
 <script>
     let jobPosts = [
         { title: "Web Developer", description: "Experience in JavaScript required.", jobType: "full-time", experienceLevel: "mid" },
@@ -79,6 +82,7 @@
         const jobType = document.querySelector('#jobType').value;
         const experienceLevel = document.querySelector('#experienceLevel').value;
         const searchResults = document.getElementById('search-results');
+    
     
         // Clear previous results
         searchResults.innerHTML = '';
