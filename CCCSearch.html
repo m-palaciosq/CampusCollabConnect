@@ -9,8 +9,10 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .search-container {
+        .search-container, .navigation-container {
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
         }
         .search-input {
             width: 70%;
@@ -19,33 +21,28 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .search-button, .filter-button, .apply-filters-button, .back-button {
+        .search-button, .filter-button, .back-button {
             padding: 10px 20px;
-            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none; /* Remove underline from links */
             display: inline-block; /* Align with other elements */
-            margin-right: 10px; /* Consistent spacing */
         }
-        .filter-button {
-            background-color: #28a745;
-        }
-        .apply-filters-button {
-            background-color: #ffc107; /* Yellow for distinction */
+        .search-button, .filter-button {
+            background-color: #007bff;
         }
         .back-button {
             background-color: #6c757d; /* Bootstrap secondary color */
         }
-        .search-button:hover, .filter-button:hover, .apply-filters-button:hover, .back-button:hover {
+        .search-button:hover, .filter-button:hover, .back-button:hover {
             opacity: 0.9;
         }
         #filter-options {
-            margin-bottom: 20px;
+            display: none;
         }
-        #filter-options label, #filter-options select {
+        #filter-options label, #filter-options select, #filter-options button {
             margin-right: 10px;
         }
     </style>
@@ -56,11 +53,10 @@
     <input type="text" class="search-input" placeholder="Search job posts...">
     <button class="search-button" onclick="searchPosts()">Search</button>
     <button class="filter-button" onclick="toggleFilters()">Filters</button>
+    <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
 </div>
 
-<div id="search-results"></div>
-
-<div id="filter-options" style="display: none;">
+<div id="filter-options">
     <label for="jobType">Job Type:</label>
     <select id="jobType">
         <option value="all">All</option>
@@ -78,9 +74,10 @@
         <option value="senior">Senior Level</option>
     </select>
     
-    <button class="apply-filters-button" onclick="searchPosts()">Apply Filters</button>
-    <a href="CCCDashboard.html" class="back-button">Back to Dashboard</a>
+    <button onclick="searchPosts()">Apply Filters</button>
 </div>
+
+<div id="search-results"></div>
 
 <script>
     let jobPosts = [
@@ -96,8 +93,7 @@
         const experienceLevel = document.querySelector('#experienceLevel').value;
         const searchResults = document.getElementById('search-results');
     
-        // Clear previous results
-        searchResults.innerHTML = '';
+        searchResults.innerHTML = ''; // Clear previous results
     
         // Filter and display job posts
         jobPosts.filter(post => {
