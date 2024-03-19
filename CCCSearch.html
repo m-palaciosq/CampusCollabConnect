@@ -27,23 +27,53 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            text-decoration: none; 
-            display: inline-block; 
+            text-decoration: none;
+            display: inline-block;
         }
         .search-button, .filter-button {
             background-color: #007bff;
         }
         .back-button {
-            background-color: #007bff; 
+            background-color: #007bff;
         }
         .search-button:hover, .filter-button:hover, .back-button:hover {
             opacity: 0.9;
         }
-        #filter-options {
+        /* Modal Styles */
+        .modal {
             display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
         }
-        #filter-options label, #filter-options select, #filter-options button {
-            margin-right: 10px;
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Checkbox styles */
+        .filter-checkboxes {
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -52,29 +82,39 @@
 <div class="search-container">
     <input type="text" class="search-input" placeholder="Search job posts...">
     <button class="search-button" onclick="searchPosts()">Search</button>
-    <button class="filter-button" onclick="toggleFilters()">Filters</button>
-    <a href="CCCDashboard.html" class="back-button">Back to Dashboard</a>
+    <button class="filter-button" onclick="showFilters()">Filters</button>
+    <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
 </div>
 
-<div id="filter-options">
-    <label for="jobType">Job Type:</label>
-    <select id="jobType">
-        <option value="all">All</option>
-        <option value="full-time">Full-Time</option>
-        <option value="part-time">Part-Time</option>
-        <option value="contract">Contract</option>
-        <option value="internship">Internship</option>
-    </select>
-    
-    <label for="experienceLevel">Experience Level:</label>
-    <select id="experienceLevel">
-        <option value="all">All</option>
-        <option value="entry">Entry Level</option>
-        <option value="mid">Mid Level</option>
-        <option value="senior">Senior Level</option>
-    </select>
-    
-    <button onclick="searchPosts()">Apply Filters</button>
+<!-- The Modal -->
+<div id="filterModal" class="modal">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <span class="close" onclick="closeFilters()">&times;</span>
+    <h3>Filter Options</h3>
+    <div class="filter-checkboxes">
+      <h4>Job Type:</h4>
+      <input type="checkbox" id="full-time" name="jobType" value="full-time">
+      <label for="full-time">Full-Time</label><br>
+      <input type="checkbox" id="part-time" name="jobType" value="part-time">
+      <label for="part-time">Part-Time</label><br>
+      <input type="checkbox" id="contract" name="jobType" value="contract">
+      <label for="contract">Contract</label><br>
+      <input type="checkbox" id="internship" name="jobType" value="internship">
+      <label for="internship">Internship</label>
+    </div>
+    <div class="filter-checkboxes">
+      <h4>Experience Level:</h4>
+      <input type="checkbox" id="entry" name="experienceLevel" value="entry">
+      <label for="entry">Entry Level</label><br>
+      <input type="checkbox" id="mid" name="experienceLevel" value="mid">
+      <label for="mid">Mid Level</label><br>
+      <input type="checkbox" id="senior" name="experienceLevel" value="senior">
+      <label for="senior">Senior Level</label>
+    </div>
+    <button onclick="applyFilters()">Apply Filters</button>
+  </div>
 </div>
 
 <div id="search-results"></div>
@@ -86,44 +126,48 @@
         { title: "Data Analyst", description: "Must know Python and SQL.", jobType: "part-time", experienceLevel: "entry" },
         // Add more job posts as needed
     ];
-    
+
     function searchPosts() {
-    const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-    const jobType = document.querySelector('#jobType').value;
-    const experienceLevel = document.querySelector('#experienceLevel').value;
-    const searchResults = document.getElementById('search-results');
-
-    searchResults.innerHTML = ''; // Clear previous results
-
-    if (!searchTerm.trim()) {
-        searchResults.innerHTML = '<p>Results cannot be blank. Please enter your search.</p>';
-        return; 
-
-    // Proceed with filtering job posts
-    const filteredPosts = jobPosts.filter(post => {
-        return (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm)) &&
-               (jobType === 'all' || post.jobType === jobType) &&
-               (experienceLevel === 'all' || post.experienceLevel === experienceLevel);
-    });
-
-    // Display filtered posts or "No results found." if none match
-    if (filteredPosts.length === 0) {
-        searchResults.innerHTML = '<p>No results found.</p>';
-    } else {
-        filteredPosts.forEach(post => {
-            const postElement = document.createElement('div');
-            postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
-            searchResults.appendChild(postElement);
-        });
-    }
-}
-}
-
+        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+        const jobType = document.querySelector('#jobType').value;
+        const experienceLevel = document.querySelector('#experienceLevel').value;
+        const searchResults = document.getElementById('search-results');
     
- function toggleFilters() {
-    var filterOptions = document.getElementById("filter-options");
-    filterOptions.style.display = filterOptions.style.display === "none" ? "block" : "none";
-}
+        searchResults.innerHTML = '';
+    }
+    function showFilters() {
+        document.getElementById("filterModal").style.display = "block";
+    }
+
+    function closeFilters() {
+        document.getElementById("filterModal").style.display = "none";
+    }
+
+    function applyFilters() {
+        const searchResults = document.getElementById('search-results');
+        const selectedJobTypes = Array.from(document.querySelectorAll('input[name="jobType"]:checked')).map(el => el.value);
+        const selectedExperienceLevels = Array.from(document.querySelectorAll('input[name="experienceLevel"]:checked')).map(el => el.value);
+
+        searchResults.innerHTML = '';
+
+        let filteredPosts = jobPosts.filter(post => {
+            const jobTypeMatch = selectedJobTypes.length === 0 || selectedJobTypes.includes(post.jobType);
+            const experienceLevelMatch = selectedExperienceLevels.length === 0 || selectedExperienceLevels.includes(post.experienceLevel);
+            return jobTypeMatch && experienceLevelMatch;
+        });
+
+        if (filteredPosts.length === 0) {
+            searchResults.innerHTML = '<p>No results found.</p>';
+        } else {
+            filteredPosts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
+                searchResults.appendChild(postElement);
+            });
+        }
+
+        closeFilters(); // Close the filter modal after applying filters
+    }
 </script>
 
 </body>
