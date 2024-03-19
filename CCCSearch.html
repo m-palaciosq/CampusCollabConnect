@@ -129,12 +129,28 @@
 
     function searchPosts() {
         const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-        const jobType = document.querySelector('#jobType').value;
-        const experienceLevel = document.querySelector('#experienceLevel').value;
+        const jobTypeCheckboxes = document.querySelectorAll('input[name="jobType"]:checked');
+        const experienceLevelCheckboxes = document.querySelectorAll('input[name="experienceLevel"]:checked');
         const searchResults = document.getElementById('search-results');
-    
-        searchResults.innerHTML = '';
+        searchResults.innerHTML = ''; // Clear previous results
+
+        let filteredPosts = jobPosts.filter(post => {
+            const jobTypeMatch = jobTypeCheckboxes.length ? Array.from(jobTypeCheckboxes).some(checkbox => post.jobType === checkbox.value) : true;
+            const experienceLevelMatch = experienceLevelCheckboxes.length ? Array.from(experienceLevelCheckboxes).some(checkbox => post.experienceLevel === checkbox.value) : true;
+            return (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm)) && jobTypeMatch && experienceLevelMatch;
+        });
+
+        if (filteredPosts.length === 0) {
+            searchResults.innerHTML = '<p>No results found.</p>';
+        } else {
+            filteredPosts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
+                searchResults.appendChild(postElement);
+            });
+        }
     }
+    
     function showFilters() {
         document.getElementById("filterModal").style.display = "block";
     }
