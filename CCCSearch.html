@@ -95,11 +95,9 @@
 
     searchResults.innerHTML = ''; // Clear previous results
 
-    // If the search term is empty, display "Search not Found" message
     if (!searchTerm.trim()) {
-        searchResults.innerHTML = '<p>Results not found. Please specify your search.</p>';
-        return; // Exit the function early
-    }
+        searchResults.innerHTML = '<p>Results cannot be blank. Please enter your search.</p>';
+        return; 
 
     // Proceed with filtering job posts
     const filteredPosts = jobPosts.filter(post => {
