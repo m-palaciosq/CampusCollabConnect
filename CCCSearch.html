@@ -27,8 +27,8 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            text-decoration: none; /* Remove underline from links */
-            display: inline-block; /* Align with other elements */
+            text-decoration: none; 
+            display: inline-block; 
         }
         .search-button, .filter-button {
             background-color: #007bff;
@@ -88,28 +88,38 @@
     ];
     
     function searchPosts() {
-        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-        const jobType = document.querySelector('#jobType').value;
-        const experienceLevel = document.querySelector('#experienceLevel').value;
-        const searchResults = document.getElementById('search-results');
-    
-        searchResults.innerHTML = ''; // Clear previous results
-    
-        // Filter and display job posts
-        jobPosts.filter(post => {
-            return (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm)) &&
-                   (jobType === 'all' || post.jobType === jobType) &&
-                   (experienceLevel === 'all' || post.experienceLevel === experienceLevel);
-        }).forEach(post => {
+    const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+    const jobType = document.querySelector('#jobType').value;
+    const experienceLevel = document.querySelector('#experienceLevel').value;
+    const searchResults = document.getElementById('search-results');
+
+    searchResults.innerHTML = ''; // Clear previous results
+
+    // If the search term is empty, display "Search not Found" message
+    if (!searchTerm.trim()) {
+        searchResults.innerHTML = '<p>Search not Found. Please enter a search term.</p>';
+        return; // Exit the function early
+    }
+
+    // Proceed with filtering job posts
+    const filteredPosts = jobPosts.filter(post => {
+        return (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm)) &&
+               (jobType === 'all' || post.jobType === jobType) &&
+               (experienceLevel === 'all' || post.experienceLevel === experienceLevel);
+    });
+
+    // Display filtered posts or "No results found." if none match
+    if (filteredPosts.length === 0) {
+        searchResults.innerHTML = '<p>No results found.</p>';
+    } else {
+        filteredPosts.forEach(post => {
             const postElement = document.createElement('div');
             postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
             searchResults.appendChild(postElement);
         });
-    
-        if (searchResults.innerHTML === '') {
-            searchResults.innerHTML = '<p>No results found.</p>';
-        }
     }
+}
+
     
  function toggleFilters() {
     var filterOptions = document.getElementById("filter-options");
