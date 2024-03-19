@@ -19,54 +19,34 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        .search-button, .filter-button, .back-button {
+        .search-button, .filter-button, .apply-filters-button, .back-button {
             padding: 10px 20px;
+            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none; /* Remove underline from links */
             display: inline-block; /* Align with other elements */
+            margin-right: 10px; /* Consistent spacing */
         }
-        .search-button, .filter-button {
-            background-color: #007bff;
+        .filter-button {
+            background-color: #28a745;
+        }
+        .apply-filters-button {
+            background-color: #ffc107; /* Yellow for distinction */
         }
         .back-button {
             background-color: #6c757d; /* Bootstrap secondary color */
         }
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .search-button:hover, .filter-button:hover, .back-button:hover {
+        .search-button:hover, .filter-button:hover, .apply-filters-button:hover, .back-button:hover {
             opacity: 0.9;
+        }
+        #filter-options {
+            margin-bottom: 20px;
+        }
+        #filter-options label, #filter-options select {
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -75,18 +55,12 @@
 <div class="search-container">
     <input type="text" class="search-input" placeholder="Search job posts...">
     <button class="search-button" onclick="searchPosts()">Search</button>
-    <button class="filter-button" onclick="showModal()">Filters</button>
-    <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
+    <button class="filter-button" onclick="toggleFilters()">Filters</button>
 </div>
 
-<!-- The Modal -->
-<div id="myModal" class="modal">
+<div id="search-results"></div>
 
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <p>Select your filters below:</p>
-    <!-- Include your filter options here -->
+<div id="filter-options" style="display: none;">
     <label for="jobType">Job Type:</label>
     <select id="jobType">
         <option value="all">All</option>
@@ -95,8 +69,57 @@
         <option value="contract">Contract</option>
         <option value="internship">Internship</option>
     </select>
-    <br>
+    
     <label for="experienceLevel">Experience Level:</label>
     <select id="experienceLevel">
         <option value="all">All</option>
         <option value="entry">Entry Level</option>
+        <option value="mid">Mid Level</option>
+        <option value="senior">Senior Level</option>
+    </select>
+    
+    <button class="apply-filters-button" onclick="searchPosts()">Apply Filters</button>
+    <a href="CCCDashboard.html" class="back-button">Back to Dashboard</a>
+</div>
+
+<script>
+    let jobPosts = [
+        { title: "Web Developer", description: "Experience in JavaScript required.", jobType: "full-time", experienceLevel: "mid" },
+        { title: "Graphic Designer", description: "Looking for a creative individual with experience in Adobe Suite.", jobType: "contract", experienceLevel: "senior" },
+        { title: "Data Analyst", description: "Must know Python and SQL.", jobType: "part-time", experienceLevel: "entry" },
+        // Add more job posts as needed
+    ];
+    
+    function searchPosts() {
+        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+        const jobType = document.querySelector('#jobType').value;
+        const experienceLevel = document.querySelector('#experienceLevel').value;
+        const searchResults = document.getElementById('search-results');
+    
+        // Clear previous results
+        searchResults.innerHTML = '';
+    
+        // Filter and display job posts
+        jobPosts.filter(post => {
+            return (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm)) &&
+                   (jobType === 'all' || post.jobType === jobType) &&
+                   (experienceLevel === 'all' || post.experienceLevel === experienceLevel);
+        }).forEach(post => {
+            const postElement = document.createElement('div');
+            postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
+            searchResults.appendChild(postElement);
+        });
+    
+        if (searchResults.innerHTML === '') {
+            searchResults.innerHTML = '<p>No results found.</p>';
+        }
+    }
+    
+    function toggleFilters() {
+        var filterOptions = document.getElementById("filter-options");
+        filterOptions.style.display = filterOptions.style.display === "none" ? "block" : "none";
+    }
+</script>
+
+</body>
+</html>
