@@ -128,7 +128,7 @@
     ];
 
     // Function to display job posts
-    function displayPosts(posts) {
+function displayPosts(posts) {
     const searchResults = document.getElementById('search-results');
     searchResults.innerHTML = ''; // Clear previous results
 
@@ -142,12 +142,13 @@
         postElement.innerHTML = `
             <h4>${post.title}</h4>
             <p>${post.description}</p>
-            <p>Job Type: ${post.jobType}</p>
-            <p>Experience Level: ${post.experienceLevel}</p>
+            <p class="job-type">Job Type: ${post.jobType}</p>
+            <p class="experience-level">Experience Level: ${post.experienceLevel}</p>
         `;
         searchResults.appendChild(postElement);
     });
 }
+
 
 
     function searchPosts() {
