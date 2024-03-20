@@ -129,22 +129,6 @@
   </div>
 </div>
 
-<!-- The Modal for Job Post Details -->
-<div id="jobPostModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle"></h2>
-        <p id="modalDescription"></p>
-        <p id="modalExperience"></p>
-        <p id="modalPosition"></p>
-        <form id="applicationForm">
-            Resume (required): <input type="file" id="resumeUpload" required><br><br>
-            Additional Document (optional): <input type="file" id="additionalDocUpload"><br><br>
-            <button type="button" onclick="submitApplication()">Apply</button>
-        </form>
-    </div>
-</div>
-
 <div id="search-results"></div>
 
 <script>
@@ -158,45 +142,26 @@
     // Function to display job posts
     function displayPosts(posts) {
     const searchResults = document.getElementById('search-results');
-    searchResults.innerHTML = '';
+    searchResults.innerHTML = ''; // Clear previous results
 
     if (posts.length === 0) {
         searchResults.innerHTML = '<p>No results found.</p>';
         return;
     }
 
-    posts.forEach((post, index) => {
+    posts.forEach(post => {
         const postElement = document.createElement('div');
-        postElement.className = 'post-container';
+        postElement.className = 'post-container'; // Apply the box styling class
         postElement.innerHTML = `
-            <h4 style="cursor:pointer;" onclick="showModal(${index})">${post.title}</h4>
-            <p>${post.description}</p>
-            <p>Experience Level: ${post.experienceLevel}</p>
-            <p>Position: ${post.position}</p> <!-- Assuming 'position' and 'author' are part of your data -->
+            <h4 class="post-title">${post.title}</h4>
+            <p class="post-description">${post.description}</p>
+            <p class="post-details">Job Type: ${post.jobType}</p>
+            <p class="post-details">Experience Level: ${post.experienceLevel}</p>
         `;
         searchResults.appendChild(postElement);
     });
 }
 
-function showModal(postIndex) {
-    const post = jobPosts[postIndex];
-    document.getElementById('modalTitle').innerText = post.title;
-    document.getElementById('modalDescription').innerText = post.description;
-    document.getElementById('modalExperience').innerText = "Experience Level: " + post.experienceLevel;
-    document.getElementById('modalPosition').innerText = "Position: " + post.position; // Adjust based on your data structure
-    // Open the modal
-    document.getElementById('jobPostModal').style.display = "block";
-}
-
-function closeModal() {
-    document.getElementById('jobPostModal').style.display = "none";
-}
-
-function submitApplication() {
-    // Placeholder for submission logic
-    alert("Application submitted!"); // Implement actual submission logic here
-    closeModal();
-}
 
 
     function searchPosts() {
