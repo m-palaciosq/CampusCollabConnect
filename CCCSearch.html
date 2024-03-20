@@ -127,14 +127,49 @@
         // Add more job posts as needed
     ];
 
+    // Function to display job posts
+    function displayPosts(posts) {
+        const searchResults = document.getElementById('search-results');
+        searchResults.innerHTML = ''; // Clear previous results
+
+        posts.forEach(post => {
+            const postElement = document.createElement('div');
+            postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
+            searchResults.appendChild(postElement);
+        });
+
+        if (posts.length === 0) {
+            searchResults.innerHTML = '<p>No results found.</p>';
+        }
+    }
+
     function searchPosts() {
         const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-        const jobType = document.querySelector('#jobType').value;
-        const experienceLevel = document.querySelector('#experienceLevel').value;
-        const searchResults = document.getElementById('search-results');
-    
-        searchResults.innerHTML = '';
+        // Filter job posts based on the search term
+        const filteredPosts = jobPosts.filter(post =>
+            post.title.toLowerCase().includes(searchTerm) ||
+            post.description.toLowerCase().includes(searchTerm)
+        );
+
+        displayPosts(filteredPosts);
     }
+
+    function applyFilters() {
+        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+        const selectedJobTypes = Array.from(document.querySelectorAll('input[name="jobType"]:checked')).map(el => el.value);
+        const selectedExperienceLevels = Array.from(document.querySelectorAll('input[name="experienceLevel"]:checked')).map(el => el.value);
+
+        let filteredPosts = jobPosts.filter(post => {
+            const jobTypeMatch = selectedJobTypes.length === 0 || selectedJobTypes.includes(post.jobType);
+            const experienceLevelMatch = selectedExperienceLevels.length === 0 || selectedExperienceLevels.includes(post.experienceLevel);
+            return (jobTypeMatch && experienceLevelMatch) && 
+                   (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
+        });
+
+        displayPosts(filteredPosts);
+        closeFilters(); // Close the filter modal after applying filters
+    }
+
     function showFilters() {
         document.getElementById("filterModal").style.display = "block";
     }
@@ -143,32 +178,12 @@
         document.getElementById("filterModal").style.display = "none";
     }
 
-    function applyFilters() {
-        const searchResults = document.getElementById('search-results');
-        const selectedJobTypes = Array.from(document.querySelectorAll('input[name="jobType"]:checked')).map(el => el.value);
-        const selectedExperienceLevels = Array.from(document.querySelectorAll('input[name="experienceLevel"]:checked')).map(el => el.value);
-
-        searchResults.innerHTML = '';
-
-        let filteredPosts = jobPosts.filter(post => {
-            const jobTypeMatch = selectedJobTypes.length === 0 || selectedJobTypes.includes(post.jobType);
-            const experienceLevelMatch = selectedExperienceLevels.length === 0 || selectedExperienceLevels.includes(post.experienceLevel);
-            return jobTypeMatch && experienceLevelMatch;
-        });
-
-        if (filteredPosts.length === 0) {
-            searchResults.innerHTML = '<p>No results found.</p>';
-        } else {
-            filteredPosts.forEach(post => {
-                const postElement = document.createElement('div');
-                postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
-                searchResults.appendChild(postElement);
-            });
-        }
-
-        closeFilters(); // Close the filter modal after applying filters
-    }
+    // Display all job posts by default when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        displayPosts(jobPosts);
+    });
 </script>
+
 
 </body>
 </html>
