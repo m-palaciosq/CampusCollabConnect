@@ -95,22 +95,22 @@
     <h3>Filter Options</h3>
     <div class="filter-checkboxes">
       <h4>Job Type:</h4>
-      <input type="checkbox" id="full-time" name="jobType" value="Full-time">
+      <input type="checkbox" id="full-time" name="jobType" value="full-time">
       <label for="full-time">Full-Time</label><br>
-      <input type="checkbox" id="part-time" name="jobType" value="Part-time">
+      <input type="checkbox" id="part-time" name="jobType" value="part-time">
       <label for="part-time">Part-Time</label><br>
-      <input type="checkbox" id="contract" name="jobType" value="Contract">
+      <input type="checkbox" id="contract" name="jobType" value="contract">
       <label for="contract">Contract</label><br>
-      <input type="checkbox" id="internship" name="jobType" value="Internship">
+      <input type="checkbox" id="internship" name="jobType" value="internship">
       <label for="internship">Internship</label>
     </div>
     <div class="filter-checkboxes">
       <h4>Experience Level:</h4>
-      <input type="checkbox" id="entry" name="experienceLevel" value="Entry">
+      <input type="checkbox" id="entry" name="experienceLevel" value="entry">
       <label for="entry">Entry Level</label><br>
-      <input type="checkbox" id="mid" name="experienceLevel" value="Mid">
+      <input type="checkbox" id="mid" name="experienceLevel" value="mid">
       <label for="mid">Mid Level</label><br>
-      <input type="checkbox" id="senior" name="experienceLevel" value="Senior">
+      <input type="checkbox" id="senior" name="experienceLevel" value="senior">
       <label for="senior">Senior Level</label>
     </div>
     <button onclick="applyFilters()">Apply Filters</button>
@@ -128,7 +128,7 @@
     ];
 
     // Function to display job posts
-function displayPosts(posts) {
+    function displayPosts(posts) {
     const searchResults = document.getElementById('search-results');
     searchResults.innerHTML = ''; // Clear previous results
 
@@ -142,14 +142,12 @@ function displayPosts(posts) {
         postElement.innerHTML = `
             <h4>${post.title}</h4>
             <p>${post.description}</p>
-            <p class="job-type">Job Type: ${post.jobType}</p>
-            <p class="experience-level">Experience Level: ${post.experienceLevel}</p>
+            <p>Job Type: ${post.jobType}</p>
+            <p>Experience Level: ${post.experienceLevel}</p>
         `;
         searchResults.appendChild(postElement);
     });
 }
-
-
 
     function searchPosts() {
         const searchTerm = document.querySelector('.search-input').value.toLowerCase();
