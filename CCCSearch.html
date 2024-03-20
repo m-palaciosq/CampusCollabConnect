@@ -139,15 +139,18 @@
 
     posts.forEach(post => {
         const postElement = document.createElement('div');
+        postElement.className = 'post-container'; // Apply the box styling class
         postElement.innerHTML = `
-            <h4>${post.title}</h4>
-            <p>${post.description}</p>
-            <p>Job Type: ${post.jobType}</p>
-            <p>Experience Level: ${post.experienceLevel}</p>
+            <h4 class="post-title">${post.title}</h4>
+            <p class="post-description">${post.description}</p>
+            <p class="post-details">Job Type: ${post.jobType}</p>
+            <p class="post-details">Experience Level: ${post.experienceLevel}</p>
         `;
         searchResults.appendChild(postElement);
     });
 }
+
+
 
     function searchPosts() {
         const searchTerm = document.querySelector('.search-input').value.toLowerCase();

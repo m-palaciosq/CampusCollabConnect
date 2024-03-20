@@ -194,5 +194,24 @@ form button {
     background-color: #5a6268; 
 }
 
+.post-container {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.post-title {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.post-description, .post-details {
+    color: #666;
+    margin-bottom: 5px;
+}
+
 
 
