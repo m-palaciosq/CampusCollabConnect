@@ -125,14 +125,6 @@
       <input type="checkbox" id="senior" name="experienceLevel" value="senior">
       <label for="senior">Senior Level</label>
     </div>
-<div class="filter-text-inputs">
-    <h4>Task Outline:</h4>
-    <input type="text" id="task-outline-filter" placeholder="Task Outline">
-    <h4>Research Requirements:</h4>
-    <input type="text" id="research-requirements-filter" placeholder="Research Requirements">
-    <h4>Collaborators:</h4>
-    <input type="text" id="collaborators-filter" placeholder="Collaborators">
-  </div>
     <button onclick="applyFilters()">Apply Filters</button>
   </div>
 </div>
@@ -184,27 +176,28 @@
     }
 
     function applyFilters() {
-    const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-    const selectedJobTypes = Array.from(document.querySelectorAll('input[name="jobType"]:checked')).map(el => el.value);
-    const selectedExperienceLevels = Array.from(document.querySelectorAll('input[name="experienceLevel"]:checked')).map(el => el.value);
-    const taskOutlineFilter = document.getElementById('task-outline-filter').value.toLowerCase();
-    const researchRequirementsFilter = document.getElementById('research-requirements-filter').value.toLowerCase();
-    const collaboratorsFilter = document.getElementById('collaborators-filter').value.toLowerCase();
+        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+        const selectedJobTypes = Array.from(document.querySelectorAll('input[name="jobType"]:checked')).map(el => el.value);
+        const selectedExperienceLevels = Array.from(document.querySelectorAll('input[name="experienceLevel"]:checked')).map(el => el.value);
 
-    let filteredPosts = jobPosts.filter(post => {
-        const jobTypeMatch = selectedJobTypes.length === 0 || selectedJobTypes.includes(post.jobType);
-        const experienceLevelMatch = selectedExperienceLevels.length === 0 || selectedExperienceLevels.includes(post.experienceLevel);
-        const taskOutlineMatch = !taskOutlineFilter || post.taskOutline.toLowerCase().includes(taskOutlineFilter);
-        const researchRequirementsMatch = !researchRequirementsFilter || post.researchRequirements.toLowerCase().includes(researchRequirementsFilter);
-        const collaboratorsMatch = !collaboratorsFilter || post.collaborators.toLowerCase().includes(collaboratorsFilter);
-        return jobTypeMatch && experienceLevelMatch && taskOutlineMatch && researchRequirementsMatch && collaboratorsMatch &&
-               (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
-    });
+        let filteredPosts = jobPosts.filter(post => {
+            const jobTypeMatch = selectedJobTypes.length === 0 || selectedJobTypes.includes(post.jobType);
+            const experienceLevelMatch = selectedExperienceLevels.length === 0 || selectedExperienceLevels.includes(post.experienceLevel);
+            return (jobTypeMatch && experienceLevelMatch) && 
+                   (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
+        });
 
-    displayPosts(filteredPosts);
-    closeFilters(); // Close the filter modal after applying filters
-}
+        displayPosts(filteredPosts);
+        closeFilters(); // Close the filter modal after applying filters
+    }
 
+    function showFilters() {
+        document.getElementById("filterModal").style.display = "block";
+    }
+
+    function closeFilters() {
+        document.getElementById("filterModal").style.display = "none";
+    }
 
     // Display all job posts by default when the page loads
     document.addEventListener('DOMContentLoaded', function() {
