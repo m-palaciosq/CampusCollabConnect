@@ -101,34 +101,29 @@
 <!-- The Modal -->
 <div id="filterModal" class="modal">
 
-  <!-- Modal content -->
-  <div class="modal-content">
-    <span class="close" onclick="closeFilters()">&times;</span>
-    <h3>Filter Options</h3>
-    <div class="filter-checkboxes">
-      <h4>Job Type:</h4>
-      <input type="checkbox" id="full-time" name="jobType" value="full-time">
-      <label for="full-time">Full-Time</label><br>
-      <input type="checkbox" id="part-time" name="jobType" value="part-time">
-      <label for="part-time">Part-Time</label><br>
-      <input type="checkbox" id="contract" name="jobType" value="contract">
-      <label for="contract">Contract</label><br>
-      <input type="checkbox" id="internship" name="jobType" value="internship">
-      <label for="internship">Internship</label>
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="closeFilters()">&times;</span>
+      <h3>Filter Options</h3>
+      <!-- Task Outline Filter -->
+      <div>
+        <h4>Task Outline:</h4>
+        <input type="text" id="task-outline-filter" placeholder="Task Outline">
+      </div>
+      <!-- Research Requirements Filter -->
+      <div>
+        <h4>Research Requirements:</h4>
+        <input type="text" id="research-requirements-filter" placeholder="Research Requirements">
+      </div>
+      <!-- Collaborators Filter -->
+      <div>
+        <h4>Collaborators:</h4>
+        <input type="text" id="collaborators-filter" placeholder="Collaborators">
+      </div>
+      <button onclick="applyFilters()">Apply Filters</button>
     </div>
-    <div class="filter-checkboxes">
-      <h4>Experience Level:</h4>
-      <input type="checkbox" id="entry" name="experienceLevel" value="entry">
-      <label for="entry">Entry Level</label><br>
-      <input type="checkbox" id="mid" name="experienceLevel" value="mid">
-      <label for="mid">Mid Level</label><br>
-      <input type="checkbox" id="senior" name="experienceLevel" value="senior">
-      <label for="senior">Senior Level</label>
-    </div>
-    <button onclick="applyFilters()">Apply Filters</button>
   </div>
-</div>
-
+  
 <div id="search-results"></div>
 
 <script>
@@ -176,28 +171,23 @@
     }
 
     function applyFilters() {
-        const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-        const selectedJobTypes = Array.from(document.querySelectorAll('input[name="jobType"]:checked')).map(el => el.value);
-        const selectedExperienceLevels = Array.from(document.querySelectorAll('input[name="experienceLevel"]:checked')).map(el => el.value);
+    const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+    const taskOutlineFilter = document.getElementById('task-outline-filter').value.toLowerCase();
+    const researchRequirementsFilter = document.getElementById('research-requirements-filter').value.toLowerCase();
+    const collaboratorsFilter = document.getElementById('collaborators-filter').value.toLowerCase();
 
-        let filteredPosts = jobPosts.filter(post => {
-            const jobTypeMatch = selectedJobTypes.length === 0 || selectedJobTypes.includes(post.jobType);
-            const experienceLevelMatch = selectedExperienceLevels.length === 0 || selectedExperienceLevels.includes(post.experienceLevel);
-            return (jobTypeMatch && experienceLevelMatch) && 
-                   (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
-        });
+    let filteredPosts = jobPosts.filter(post => {
+        const taskOutlineMatch = !taskOutlineFilter || post.taskOutline.toLowerCase().includes(taskOutlineFilter);
+        const researchRequirementsMatch = !researchRequirementsFilter || post.researchRequirements.toLowerCase().includes(researchRequirementsFilter);
+        const collaboratorsMatch = !collaboratorsFilter || post.collaborators.toLowerCase().includes(collaboratorsFilter);
+        return taskOutlineMatch && researchRequirementsMatch && collaboratorsMatch &&
+               (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
+    });
 
-        displayPosts(filteredPosts);
-        closeFilters(); // Close the filter modal after applying filters
-    }
+    displayPosts(filteredPosts);
+    closeFilters(); // Close the filter modal after applying filters
+}
 
-    function showFilters() {
-        document.getElementById("filterModal").style.display = "block";
-    }
-
-    function closeFilters() {
-        document.getElementById("filterModal").style.display = "none";
-    }
 
     // Display all job posts by default when the page loads
     document.addEventListener('DOMContentLoaded', function() {
