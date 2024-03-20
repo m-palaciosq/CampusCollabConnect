@@ -129,19 +129,26 @@
 
     // Function to display job posts
     function displayPosts(posts) {
-        const searchResults = document.getElementById('search-results');
-        searchResults.innerHTML = ''; // Clear previous results
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = ''; // Clear previous results
 
-        posts.forEach(post => {
-            const postElement = document.createElement('div');
-            postElement.innerHTML = `<h4>${post.title}</h4><p>${post.description}</p>`;
-            searchResults.appendChild(postElement);
-        });
-
-        if (posts.length === 0) {
-            searchResults.innerHTML = '<p>No results found.</p>';
-        }
+    if (posts.length === 0) {
+        searchResults.innerHTML = '<p>No results found.</p>';
+        return;
     }
+
+    posts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.innerHTML = `
+            <h4>${post.title}</h4>
+            <p>${post.description}</p>
+            <p>Job Type: ${post.jobType}</p>
+            <p>Experience Level: ${post.experienceLevel}</p>
+        `;
+        searchResults.appendChild(postElement);
+    });
+}
+
 
     function searchPosts() {
         const searchTerm = document.querySelector('.search-input').value.toLowerCase();
