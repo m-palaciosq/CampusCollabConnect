@@ -4,6 +4,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Account Creation</title>
         <link rel="stylesheet" href="styles.css">
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script>
+            $(document).ready(function() {
+                $('#accountCreationForm').submit(function(e) {
+                    e.preventDefault();
+
+                    // Fetch input values
+                    var newEmail = $('#newEmail').val();
+                    var newPassword = $('#newPassword').val();
+                    var confirmPassword = $('#confirmPassword').val();
+                
+                    // Checks
+                    if(!newEmail.endsWith('@uncg.edu') && newPassword !== confirmPassword){
+                        $('#creation-error-message').text('Email must end with @uncg.edu\n Passwords do not match');
+                        return;
+                    }else if (newPassword !== confirmPassword) {
+                        $('#creation-error-message').text('Passwords do not match');
+                        return;
+                    }else if(!newEmail.endsWith('@uncg.edu')){
+                        $('#creation-error-message').text('Email must end with @uncg.edu');
+                        return;
+                    }
+                    // can perform more validation like checking username uniqueness, password strength, etc.
+                
+                    window.location.href = "login.html";
+                });
+            });
+        </script>
     </head>
     <body>
         <div class="container">
