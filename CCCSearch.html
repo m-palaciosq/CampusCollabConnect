@@ -187,7 +187,7 @@
                 const postElement = document.createElement('div');
                 postElement.className = 'post-container';
                 postElement.innerHTML = `
-        <h4 class="post-title" onclick="openJobPostDetailsModal('${post.title.replace(/'/g, "\\'")}', '${post.collaborators.replace(/'/g, "\\'")}', '${post.description.replace(/'/g, "\\'")}')">${post.title}</h4>
+        <h4 class="post-title" onclick="openJobPostDetailsModal('${post.title}', '${post.collaborators}', '${post.description}')">${post.title}</h4>
         <p class="post-description">${post.description}</p>
         <p class="post-details">Task Outline: ${post.taskOutline}</p>
         <p class="post-details">Research Requirements: ${post.researchRequirements}</p>
@@ -195,11 +195,12 @@
     `;
                 searchResults.appendChild(postElement);
             });
+
         }
 
         function openJobPostDetailsModal(title, collaborators, description) {
             document.getElementById('jobPostTitle').innerText = title;
-            document.getElementById('jobPostAuthor').innerText = `Collaborators: ${collaborators}`;
+            document.getElementById('jobPostAuthor').innerText = collaborators; // Update this line
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
