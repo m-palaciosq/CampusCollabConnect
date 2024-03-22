@@ -204,9 +204,13 @@ form button {
 }
 
 .post-title {
-    color: #333;
-    margin-bottom: 10px;
+    cursor: pointer; 
+    color: #333; 
 }
+.post-title:hover {
+    color: blue; 
+}
+
 
 .post-description, .post-details {
     color: #666;
