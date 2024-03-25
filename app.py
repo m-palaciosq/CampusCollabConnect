@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 import mysql.connector
 
-app = Flask(__name__, template_folder='CampusCollabConnect')
+app = Flask(__name__)
 
 def get_db_connection():
     connection = mysql.connector.connect(
@@ -24,7 +24,7 @@ def home():
     cursor.close()
     conn.close()
 
-    return render_template('CCCSearch.html')
+    return render_template('CCCSearch.html', job_posts=job_posts)
 
 if __name__ == '__main__':
     app.run(debug=True)
