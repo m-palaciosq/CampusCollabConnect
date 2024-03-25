@@ -124,7 +124,7 @@
 
     <div class="search-container">
         <input type="text" class="search-input" placeholder="Search job posts...">
-        <button class="search-button" onclick="searchPosts()">Search</button>
+        <button class="search-button">Search</button> <!-- Removed onclick -->
         <button class="filter-button" onclick="showFilters()">Filters</button>
         <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
     </div>
@@ -165,32 +165,6 @@
     </div>
 
     <script>
-        
-
-        function displayPosts(posts) {
-            const searchResults = document.getElementById('search-results');
-            searchResults.innerHTML = ''; // Clear previous results
-
-            if (posts.length === 0) {
-                searchResults.innerHTML = '<p>No results found.</p>';
-                return;
-            }
-
-            posts.forEach(post => {
-                const postElement = document.createElement('div');
-                postElement.className = 'post-container';
-                postElement.innerHTML = `
-        <h4 class="post-title" onclick="openJobPostDetailsModal('${post.title}', '${post.collaborators}', '${post.description}')">${post.title}</h4>
-        <p class="post-description">${post.description}</p>
-        <p class="post-details">Task Outline: ${post.taskOutline}</p>
-        <p class="post-details">Research Requirements: ${post.researchRequirements}</p>
-        <p class="post-details">Collaborators: ${post.collaborators}</p>
-    `;
-                searchResults.appendChild(postElement);
-            });
-
-        }
-
         function openJobPostDetailsModal(title, collaborators, description) {
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostAuthor').innerText = collaborators; // Update this line
@@ -217,7 +191,6 @@
                     (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
             });
 
-            displayPosts(filteredPosts);
             closeFilters(); // Close the filter modal after applying filters
         }
 
