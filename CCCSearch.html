@@ -129,20 +129,17 @@
         <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
     </div>
 
-    <!-- Job Post Details Modal -->
-    <div id="jobPostDetailsModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
-            <h3 id="jobPostTitle"></h3>
-            <p>Collaborators: <span id="jobPostAuthor"></span></p>
-            <p>Description:</p>
-            <p id="jobPostDescription"></p>
-            <form id="resumeSubmissionForm">
-                <label for="resumeFile">Attach your resume:</label>
-                <input type="file" id="resumeFile" name="resumeFile">
-                <button type="submit">Submit Request</button>
-            </form>
+    <div id="search-results">
+        <!-- Dynamically generated job posts from Flask -->
+        {% for post in job_posts %}
+        <div class="post-container">
+            <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">{{ post.title }}</h4>
+            <p class="post-description">{{ post.description }}</p>
+            <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
+            <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
         </div>
+        {% endfor %}
     </div>
 
     <!-- The Modal -->
@@ -166,8 +163,6 @@
             <button onclick="applyFilters()">Apply Filters</button>
         </div>
     </div>
-
-    <div id="search-results"></div>
 
     <script>
         let jobPosts = [
