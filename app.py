@@ -1,14 +1,14 @@
 from flask import Flask, render_template
 import mysql.connector
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='CampusCollabConnect')
 
 def get_db_connection():
     connection = mysql.connector.connect(
         host='localhost',
         user='root',
-        password='',  # Default XAMPP MySQL setup has no password for root
-        database='campuscollabconnect'  # Make sure to replace this with your actual database name
+        password='',  
+        database='campuscollabconnect'  
     )
     return connection
 
