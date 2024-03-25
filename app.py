@@ -8,7 +8,7 @@ def get_db_connection():
         host='localhost',
         user='root',
         password='',  # Default XAMPP MySQL setup has no password for root
-        database='yourDatabaseName'  # Make sure to replace this with your actual database name
+        database='campuscollabconnect'  # Make sure to replace this with your actual database name
     )
     return connection
 
