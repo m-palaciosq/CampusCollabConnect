@@ -24,7 +24,7 @@ def home():
     cursor.close()
     conn.close()
 
-    return render_template('CCCSearch.html', job_posts=job_posts)
+    return render_template('CCCSearch.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
