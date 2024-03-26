@@ -150,6 +150,17 @@
         {% endfor %}
     </div>
 
+    {% for post in job_posts %}
+<div class="post-container">
+    <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.description }}', '{{ post.postID }}')">
+        {{ post.title }}
+    </h4>
+    <p class="post-description">{{ post.description }}</p>
+    <!-- include other post details as needed -->
+</div>
+{% endfor %}
+
+
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
@@ -183,7 +194,7 @@
             closeJobPostDetailsModal();
         }
     }
-    
+
         document.getElementById('search-button').addEventListener('click', function () {
             // Get the search term from the input field
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
