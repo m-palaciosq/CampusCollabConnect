@@ -1,18 +1,9 @@
-import mysql.connector
+import dbConn
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-# Connect to MySQL
-conn = mysql.connector.connect(
-    host="127.0.0.1",
-    user="root",
-    password="",
-    database="campuscollabconnect"
-)
-
-# Create cursor
-cursor = conn.cursor()
+cursor, conn = dbConn.get_connection()
     
 @app.route('/account_creation_backend', methods=['POST'])
 def submit_form():
