@@ -221,21 +221,53 @@
         }
 
         function applyFilters() {
-            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-            const taskOutlineFilter = document.getElementById('task-outline-filter').value.toLowerCase();
-            const researchRequirementsFilter = document.getElementById('research-requirements-filter').value.toLowerCase();
-            const collaboratorsFilter = document.getElementById('collaborators-filter').value.toLowerCase();
+    // Gather filter criteria from input fields
+    const searchTerm = document.querySelector('.search-input').value;
+    const taskOutlineFilter = document.getElementById('task-outline-filter').value;
+    const researchRequirementsFilter = document.getElementById('research-requirements-filter').value;
+    const collaboratorsFilter = document.getElementById('collaborators-filter').value;
 
-            let filteredPosts = jobPosts.filter(post => {
-                const taskOutlineMatch = !taskOutlineFilter || post.taskOutline.toLowerCase().includes(taskOutlineFilter);
-                const researchRequirementsMatch = !researchRequirementsFilter || post.researchRequirements.toLowerCase().includes(researchRequirementsFilter);
-                const collaboratorsMatch = !collaboratorsFilter || post.collaborators.toLowerCase().includes(collaboratorsFilter);
-                return taskOutlineMatch && researchRequirementsMatch && collaboratorsMatch &&
-                    (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
-            });
+    // Use the Fetch API to send a request to your Flask route with the filter criteria
+    fetch('/filter', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            search: searchTerm,
+            task_outline: taskOutlineFilter,
+            research_requirements: researchRequirementsFilter,
+            collaborators: collaboratorsFilter,
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Assuming 'data' is an array of filtered job posts returned from the server
+        updateJobPosts(data);
+        closeFilters(); // Close the filter modal after applying filters
+    })
+    .catch(error => console.error('Error:', error));
+}
 
-            closeFilters(); // Close the filter modal after applying filters
-        }
+function updateJobPosts(filteredPosts) {
+    const searchResults = document.getElementById('search-results');
+    searchResults.innerHTML = ''; // Clear existing posts
+
+    // Dynamically create and append posts to the 'search-results' container
+    filteredPosts.forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.className = 'post-container';
+        postElement.innerHTML = `
+            <h4 class="post-title" onclick="openJobPostDetailsModal('${post.title}', '${post.collaborators}', '${post.description}')">${post.title}</h4>
+            <p class="post-description">${post.description}</p>
+            <p class="post-details">Task Outline: ${post.taskOutline || 'Not specified'}</p>
+            <p class="post-details">Research Requirements: ${post.researchRequirements || 'Not specified'}</p>
+            <p class="post-details">Collaborators: ${post.collaborators || 'Not specified'}</p>
+        `;
+        searchResults.appendChild(postElement);
+    });
+}
+
 
         function showFilters() {
             document.getElementById("filterModal").style.display = "block";
