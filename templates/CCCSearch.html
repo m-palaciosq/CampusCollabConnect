@@ -152,7 +152,7 @@
 
     {% for post in job_posts %}
 <div class="post-container">
-    <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.description }}', '{{ post.postID }}')">
+    <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.description }}', '{{ post.id }}')">
         {{ post.title }}
     </h4>
     <p class="post-description">{{ post.description }}</p>
