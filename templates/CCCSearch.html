@@ -128,7 +128,7 @@
     <!-- Combined Search and Filter Form -->
     <div class="search-container">
         <input type="text" class="search-input" name="search" form="searchForm" placeholder="Search job posts...">
-        <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
+        <a href="{{ url_for('static', filename='CCCDashboard.html') }}" class="back-button">Return to Dashboard</a>
     </div>
 
     <form id="searchForm" action="/" method="get">
