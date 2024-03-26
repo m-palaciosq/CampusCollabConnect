@@ -128,20 +128,14 @@
     <!-- Combined Search and Filter Form -->
     <div class="search-container">
         <input type="text" class="search-input" name="search" form="searchForm" placeholder="Search job posts...">
-        <!-- Removed the separate filter button -->
         <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
     </div>
 
-    <!-- The form now includes both search and filter inputs -->
     <form id="searchForm" action="/" method="get">
-        <input type="text" name="taskOutline" placeholder="Task Outline...">
-        <input type="text" name="researchRequirements" placeholder="Research Requirements...">
-        <input type="text" name="collaborators" placeholder="Collaborators...">
         <button type="submit">Search/Filter</button>
     </form>
 
     <div id="search-results">
-        <!-- Dynamically generated job posts from Flask -->
         {% for post in job_posts %}
         <div class="post-container">
             <h4 class="post-title"
@@ -211,8 +205,6 @@
             document.getElementById("filterModal").style.display = "none";
         }
     
-        // Removed the applyFilters function since it's not needed
-        // Removed the event listener for 'search-button' since it's not needed
     </script>
     
 </body>
