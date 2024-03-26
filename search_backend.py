@@ -38,5 +38,9 @@ def home():
     conn.close()
     return render_template('CCCSearch.html', job_posts=job_posts)
 
+@app.route('/dashboard')
+def dashboard():
+    return render_template('CCCDashboard.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
