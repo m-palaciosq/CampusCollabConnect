@@ -143,23 +143,11 @@
                 {{ post.title }}</h4>
             <p class="post-description">{{ post.description }}</p>
             <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
-            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}
-            </p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
             <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
         </div>
         {% endfor %}
     </div>
-
-    {% for post in job_posts %}
-<div class="post-container">
-    <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.description }}', '{{ post.id }}')">
-        {{ post.title }}
-    </h4>
-    <p class="post-description">{{ post.description }}</p>
-    <!-- include other post details as needed -->
-</div>
-{% endfor %}
-
 
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
