@@ -15,13 +15,10 @@ def get_db_connection():
 def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
-    # Make sure your SQL query matches your database schema
     cursor.execute("SELECT * FROM posts")
     job_posts = cursor.fetchall()
     cursor.close()
     conn.close()
-
     return render_template('CCCSearch.html', job_posts=job_posts)
 
 if __name__ == '__main__':
