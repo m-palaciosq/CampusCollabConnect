@@ -176,9 +176,8 @@
             // Loop through all job posts and toggle visibility based on the search term
             jobPosts.forEach(function (post) {
                 const postTitle = post.textContent.toLowerCase();
-                const postContainer = post.parentElement; // Assuming the title is a direct child of the post container
+                const postContainer = post.parentElement; 
     
-                // If the post title includes the search term, show it; otherwise, hide it
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = '';
                 } else {
