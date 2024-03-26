@@ -161,27 +161,31 @@
         </div>
     </div>
 
-    <!-- The Modal -->
-    <div id="filterModal" class="modal">
-        <!-- Modal content -->
-        <div class="modal-content">
-            <span class="close" onclick="closeFilters()">&times;</span>
-            <h3>Filter Options</h3>
-            <div>
-                <h4>Task Outline:</h4>
-                <input type="text" id="task-outline-filter" placeholder="Task Outline">
-            </div>
-            <div>
-                <h4>Research Requirements:</h4>
-                <input type="text" id="research-requirements-filter" placeholder="Research Requirements">
-            </div>
-            <div>
-                <h4>Collaborators:</h4>
-                <input type="text" id="collaborators-filter" placeholder="Collaborators">
-            </div>
-            <button onclick="applyFilters()">Apply Filters</button>
+<!-- The Filter Modal -->
+<div id="filterModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <span class="close" onclick="closeFilters()">&times;</span>
+        <h3>Filter Options</h3>
+        <div>
+            <h4>Task Outline:</h4>
+            <!-- Ensure the input ID matches what you expect in your JavaScript and Flask app -->
+            <input type="text" id="task-outline-filter" name="task_outline" placeholder="Task Outline">
         </div>
+        <div>
+            <h4>Research Requirements:</h4>
+            <!-- Ensure the input ID matches what you expect in your JavaScript and Flask app -->
+            <input type="text" id="research-requirements-filter" name="research_requirements" placeholder="Research Requirements">
+        </div>
+        <div>
+            <h4>Collaborators:</h4>
+            <!-- Ensure the input ID matches what you expect in your JavaScript and Flask app -->
+            <input type="text" id="collaborators-filter" name="collaborators" placeholder="Collaborators">
+        </div>
+        <!-- Add an ID to your button for easier JavaScript targeting -->
+        <button id="apply-filters-btn" onclick="applyFilters()">Apply Filters</button>
     </div>
+</div>
 
     <script>
         document.getElementById('search-button').addEventListener('click', function () {
