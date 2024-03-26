@@ -132,7 +132,7 @@
     </div>
 
     <form id="searchForm" action="/" method="get">
-
+        
     </form>
 
     <div id="search-results">
@@ -143,46 +143,40 @@
                 {{ post.title }}</h4>
             <p class="post-description">{{ post.description }}</p>
             <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
-            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}
-            </p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
             <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
         </div>
         {% endfor %}
     </div>
-
-    <!-- Job Post Title -->
-    <h2 onclick="openJobPostModal()">Job Post Title</h2>
-
-    <!-- The Modal -->
-    <div id="jobPostModal" class="modal">
-
-        <!-- Modal content -->
+    <!-- Job Post Details Modal -->
+    <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeJobPostModal()">&times;</span>
-            <h3 id="modalTitle">Job Post Title</h3>
-            <p id="modalDescription">Job Post Description</p>
-            <form id="attachmentForm" enctype="multipart/form-data">
-                <label for="attachmentFile">Attach File:</label>
-                <input type="file" id="attachmentFile" name="attachmentFile">
-                <button type="button" onclick="submitAttachment()">Submit</button>
+            <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
+            <h3 id="jobPostTitle"></h3>
+            <p id="jobPostDescription"></p>
+            <!-- Updated form for resume submission -->
+            <form id="resumeSubmissionForm" enctype="multipart/form-data">
+                <label for="resumeFile">Attach your resume:</label>
+                <input type="file" id="resumeFile" name="resumeFile">
+                <input type="hidden" id="postID" name="postID"> <!-- Hidden field for postID -->
+                <button type="button" onclick="submitResume()">Submit Request</button>
             </form>
         </div>
-
     </div>
 
     <script>
         document.getElementById('search-button').addEventListener('click', function () {
             // Get the search term from the input field
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-
+    
             // Get all the job post titles within the page
             const jobPosts = document.querySelectorAll('.post-title');
-
+    
             // Loop through all job posts and toggle visibility based on the search term
             jobPosts.forEach(function (post) {
                 const postTitle = post.textContent.toLowerCase();
                 const postContainer = post.parentElement; // Assuming the title is a direct child of the post container
-
+    
                 // If the post title includes the search term, show it; otherwise, hide it
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = '';
@@ -191,60 +185,28 @@
                 }
             });
         });
-        var modal = document.getElementById('jobPostModal');
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function (event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
+    
+        function openJobPostDetailsModal(title, collaborators, description) {
+            document.getElementById('jobPostTitle').innerText = title;
+            document.getElementById('jobPostAuthor').innerText = collaborators;
+            document.getElementById('jobPostDescription').innerText = description;
+            document.getElementById('jobPostDetailsModal').style.display = "block";
         }
-
-
-        function openJobPostModal() {
-            var modal = document.getElementById('jobPostModal');
-            modal.style.display = "block";
-
-            // Populate modal with job post details
-            var title = "Job Post Title"; // Replace with dynamic data
-            var description = "Job Post Description"; // Replace with dynamic data
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalDescription').innerText = description;
-        }
-
+    
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
-        
-        // Function to submit attachment
-        function submitAttachment() {
-            // Get the file input element
-            var fileInput = document.getElementById('attachmentFile');
-            var file = fileInput.files[0];
-
-            // Send the file to the server (you will need to implement this)
-            // Example using fetch API:
-            var formData = new FormData();
-            formData.append('file', file);
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        alert('File uploaded successfully!');
-                    } else {
-                        throw new Error('Failed to upload file');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Failed to upload file');
-                });
+    
+        function showFilters() {
+            document.getElementById("filterModal").style.display = "block";
         }
+    
+        function closeFilters() {
+            document.getElementById("filterModal").style.display = "none";
+        }
+    
     </script>
-
+    
 </body>
 
 </html>
