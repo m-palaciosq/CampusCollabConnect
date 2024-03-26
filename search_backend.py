@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import mysql.connector
 
 app = Flask(__name__)
@@ -8,17 +8,40 @@ def get_db_connection():
         host='localhost',
         user='root',
         password='',  
-        database='campuscollabconnect'  
+        database='campuscollabconnect'
     )
     return connection
+
 @app.route('/')
 def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Make sure your SQL query matches your database schema
-    cursor.execute("SELECT * FROM posts")
+    # Get filter values from query parameters
+    search = request.args.get('search', '')
+    task_outline = request.args.get('task_outline', '')
+    research_requirements = request.args.get('research_requirements', '')
+    collaborators = request.args.get('collaborators', '')
+    
+    # Construct the base query
+    query = "SELECT * FROM JobPosts WHERE Title LIKE %s"
+    query_params = [f'%{search}%']
+    
+    # Add additional filters if they are specified
+    if task_outline:
+        query += " AND TaskOutline LIKE %s"
+        query_params.append(f'%{task_outline}%')
+    if research_requirements:
+        query += " AND ResearchRequirements LIKE %s"
+        query_params.append(f'%{research_requirements}%')
+    if collaborators:
+        query += " AND Collaborators LIKE %s"
+        query_params.append(f'%{collaborators}%')
+    
+    # Execute the query with the filters
+    cursor.execute(query, query_params)
     job_posts = cursor.fetchall()
+
     cursor.close()
     conn.close()
 
