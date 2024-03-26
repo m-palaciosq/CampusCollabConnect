@@ -142,6 +142,22 @@
         {% endfor %}
     </div>
 
+    <!-- Job Post Details Modal -->
+<div id="jobPostDetailsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
+        <h3 id="jobPostTitle"></h3>
+        <p id="jobPostDescription"></p>
+        <!-- Updated form for resume submission -->
+        <form id="resumeSubmissionForm" enctype="multipart/form-data">
+            <label for="resumeFile">Attach your resume:</label>
+            <input type="file" id="resumeFile" name="resumeFile">
+            <input type="hidden" id="postID" name="postID"> <!-- Hidden field for postID -->
+            <button type="button" onclick="submitResume()">Submit Request</button>
+        </form>
+    </div>
+</div>
+
     <!-- The Modal -->
     <div id="filterModal" class="modal">
         <!-- Modal content -->
