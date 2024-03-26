@@ -1,59 +1,114 @@
-<html lang="eng">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Account Creation</title>
-        <link rel="stylesheet" href="styles.css">
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-        <script>
-            $(document).ready(function() {
-                $('#accountCreationForm').submit(function(e) {
-                    e.preventDefault();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Creation</title>
+    <style>
+        .container {
+          width: 50%;
+          margin: 0 auto;
+        }
 
-                    // Fetch input values
-                    var newEmail = $('#newEmail').val();
-                    var newPassword = $('#newPassword').val();
-                    var confirmPassword = $('#confirmPassword').val();
-                
-                    // Checks
-                    if(!newEmail.endsWith('@uncg.edu') && newPassword !== confirmPassword){
-                        $('#creation-error-message').text('Email must end with @uncg.edu\n Passwords do not match');
-                        return;
-                    }else if (newPassword !== confirmPassword) {
-                        $('#creation-error-message').text('Passwords do not match');
-                        return;
-                    }else if(!newEmail.endsWith('@uncg.edu')){
-                        $('#creation-error-message').text('Email must end with @uncg.edu');
-                        return;
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        label {
+          display: block;
+          font-weight: bold;
+        }
+
+        .input-error {
+          border: 1px solid red;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function() {
+          $('#accountForm').submit(function(e) {
+            e.preventDefault(); // Prevent form submission
+
+            // Reset any previous errors
+            $('input').removeClass('input-error');
+
+            // Get form values
+            var firstName = $('#firstName').val();
+            var lastName = $('#lastName').val();
+            var email = $('#email').val();
+            var password = $('#password').val();
+            var confirmPassword = $('#confirmPassword').val();
+
+            // Simple email validation
+            if (!email.endsWith('@uncg.edu')) {
+              $('#email').addClass('input-error');
+              return; // Stop execution if email is invalid
+            }
+
+            // Password match validation
+            if (password !== confirmPassword) {
+              $('#password, #confirmPassword').addClass('input-error');
+              return; // Stop execution if passwords don't match
+            }
+
+            // If all validations pass, send data to server
+            $.ajax({
+              type: 'POST',
+              url: 'account_creation_backend.py',
+              data: {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+              },
+              success: function(response) {
+                // Handle success response here
+                console.log(response);
+              },
+              error: function(xhr, status, error) {
+                    if (xhr.status === 0) {
+                        console.error('Connection error: Check your internet connection.');
+                    } else if (xhr.status === 404) {
+                        console.error('Requested page not found [404].');
+                    } else if (xhr.status === 500) {
+                        console.error('Internal Server Error [500].');
+                    } else {
+                        console.error('Unknown error occurred:', error);
                     }
-                    // can perform more validation like checking username uniqueness, password strength, etc.
-                
-                    window.location.href = "login.html";
-                });
+                }
             });
-        </script>
-    </head>
-    <body>
-        <div class="container">
-            <form id="accountCreationForm">
-                <h2>Create Account</h2>
-                <div class="input-group">
-                    <label for="newEmail">Email</label>
-                    <input type="text" id="newEmail" name="newEmail" required>
-                </div>
-                <div class="input-group">
-                    <label for="newPassword">Password</label>
-                    <input type="password" id="newPassword" name="newPassword" required>
-                </div>
-                <div class="input-group">
-                    <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
-                </div>
-                <button type="submit">Create Account</button>
-                <p id="creation-error-message"></p>
-            </form>
-        </div>
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-        <script src="script.js"></script>
-    </body>
+          });
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Create an Account</h2>
+  <form id="accountForm" action="account_creation_backend.py" method="post">
+    <div class="form-group">
+      <label for="firstName">First Name:</label>
+      <input type="text" class="form-control" id="firstName" name="firstName" required>
+    </div>
+    <div class="form-group">
+      <label for="lastName">Last Name:</label>
+      <input type="text" class="form-control" id="lastName" name="lastName" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" class="form-control" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password:</label>
+      <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+
+</body>
 </html>
