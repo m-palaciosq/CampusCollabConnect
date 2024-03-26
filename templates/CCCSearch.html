@@ -107,16 +107,16 @@
             cursor: pointer;
             color: #333;
         }
+
         .post-title:hover {
             color: blue;
         }
+
         .post-description,
         .post-details {
             color: #333;
             margin-bottom: 10px;
         }
-
-        
     </style>
 </head>
 
@@ -133,30 +133,33 @@
         <!-- Dynamically generated job posts from Flask -->
         {% for post in job_posts %}
         <div class="post-container">
-            <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">{{ post.title }}</h4>
+            <h4 class="post-title"
+                onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">
+                {{ post.title }}</h4>
             <p class="post-description">{{ post.description }}</p>
             <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
-            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}
+            </p>
             <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
         </div>
         {% endfor %}
     </div>
 
     <!-- Job Post Details Modal -->
-<div id="jobPostDetailsModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
-        <h3 id="jobPostTitle"></h3>
-        <p id="jobPostDescription"></p>
-        <!-- Updated form for resume submission -->
-        <form id="resumeSubmissionForm" enctype="multipart/form-data">
-            <label for="resumeFile">Attach your resume:</label>
-            <input type="file" id="resumeFile" name="resumeFile">
-            <input type="hidden" id="postID" name="postID"> <!-- Hidden field for postID -->
-            <button type="button" onclick="submitResume()">Submit Request</button>
-        </form>
+    <div id="jobPostDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
+            <h3 id="jobPostTitle"></h3>
+            <p id="jobPostDescription"></p>
+            <!-- Updated form for resume submission -->
+            <form id="resumeSubmissionForm" enctype="multipart/form-data">
+                <label for="resumeFile">Attach your resume:</label>
+                <input type="file" id="resumeFile" name="resumeFile">
+                <input type="hidden" id="postID" name="postID"> <!-- Hidden field for postID -->
+                <button type="button" onclick="submitResume()">Submit Request</button>
+            </form>
+        </div>
     </div>
-</div>
 
     <!-- The Modal -->
     <div id="filterModal" class="modal">
@@ -181,13 +184,34 @@
     </div>
 
     <script>
+        document.getElementById('search-button').addEventListener('click', function () {
+            // Get the search term from the input field
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+
+            // Get all the job post titles within the page
+            const jobPosts = document.querySelectorAll('.post-title');
+
+            // Loop through all job posts and toggle visibility based on the search term
+            jobPosts.forEach(function (post) {
+                const postTitle = post.textContent.toLowerCase();
+                const postContainer = post.parentElement; // Assuming the title is a direct child of the post container
+
+                // If the post title includes the search term, show it; otherwise, hide it
+                if (postTitle.includes(searchTerm)) {
+                    postContainer.style.display = '';
+                } else {
+                    postContainer.style.display = 'none';
+                }
+            });
+        });
+
         function openJobPostDetailsModal(title, collaborators, description) {
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostAuthor').innerText = collaborators;
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
-    
+
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
@@ -210,13 +234,13 @@
         }
 
         function showFilters() {
-        document.getElementById("filterModal").style.display = "block";
-    }
+            document.getElementById("filterModal").style.display = "block";
+        }
 
-    function closeFilters() {
-        document.getElementById("filterModal").style.display = "none";
-    }
-    document.getElementById('search-button').addEventListener('click', applyFilters);
+        function closeFilters() {
+            document.getElementById("filterModal").style.display = "none";
+        }
+        document.getElementById('search-button').addEventListener('click', applyFilters);
 
     </script>
 </body>
