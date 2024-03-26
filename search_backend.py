@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import mysql.connector
 
 app = Flask(__name__)
@@ -11,11 +11,27 @@ def get_db_connection():
         database='campuscollabconnect'  
     )
     return connection
+
 @app.route('/')
 def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM posts")
+    
+    search = request.args.get('search', default='%')
+    task_outline = request.args.get('taskOutline', default='%')  # Adjusted to taskOutline
+    research_requirements = request.args.get('researchRequirements', default='%')  # Adjusted to researchRequirements
+    collaborators = request.args.get('collaborators', default='%')
+    
+    query = """
+    SELECT * FROM posts
+    WHERE 
+        title LIKE %s AND
+        taskOutline LIKE %s AND 
+        researchRequirements LIKE %s AND 
+        collaborators LIKE %s
+    """
+    cursor.execute(query, (search, task_outline, research_requirements, collaborators))
+    
     job_posts = cursor.fetchall()
     cursor.close()
     conn.close()
