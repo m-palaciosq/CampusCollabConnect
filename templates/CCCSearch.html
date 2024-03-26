@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Job Posts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .search-container,
+        .navigation-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 70%;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .search-button,
+        .filter-button,
+        .back-button {
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .search-button,
+        .filter-button {
+            background-color: #007bff;
+        }
+
+        .back-button {
+            background-color: #007bff;
+        }
+
+        .search-button:hover,
+        .filter-button:hover,
+        .back-button:hover {
+            opacity: 0.9;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Checkbox styles */
+        .filter-checkboxes {
+            margin: 10px 0;
+        }
+
+        .post-container {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-title {
+            cursor: pointer;
+            color: #333;
+        }
+        .post-title:hover {
+            color: blue;
+        }
+        .post-description,
+        .post-details {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search job posts...">
+        <button class="search-button">Search</button> <!-- Removed onclick -->
+        <button class="filter-button" onclick="showFilters()">Filters</button>
+        <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
+    </div>
+
+    <div id="search-results">
+        <!-- Dynamically generated job posts from Flask -->
+        {% for post in job_posts %}
+        <div class="post-container">
+            <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">{{ post.title }}</h4>
+            <p class="post-description">{{ post.description }}</p>
+            <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
+            <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- The Modal -->
+    <div id="filterModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close" onclick="closeFilters()">&times;</span>
+            <h3>Filter Options</h3>
+            <div>
+                <h4>Task Outline:</h4>
+                <input type="text" id="task-outline-filter" placeholder="Task Outline">
+            </div>
+            <div>
+                <h4>Research Requirements:</h4>
+                <input type="text" id="research-requirements-filter" placeholder="Research Requirements">
+            </div>
+            <div>
+                <h4>Collaborators:</h4>
+                <input type="text" id="collaborators-filter" placeholder="Collaborators">
+            </div>
+            <button onclick="applyFilters()">Apply Filters</button>
+        </div>
+    </div>
+
+    <script>
+        function openJobPostDetailsModal(title, collaborators, description) {
+            document.getElementById('jobPostTitle').innerText = title;
+            document.getElementById('jobPostAuthor').innerText = collaborators;
+            document.getElementById('jobPostDescription').innerText = description;
+            document.getElementById('jobPostDetailsModal').style.display = "block";
+        }
+    
+        function closeJobPostDetailsModal() {
+            document.getElementById('jobPostDetailsModal').style.display = "none";
+        }
+
+        function applyFilters() {
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+            const taskOutlineFilter = document.getElementById('task-outline-filter').value.toLowerCase();
+            const researchRequirementsFilter = document.getElementById('research-requirements-filter').value.toLowerCase();
+            const collaboratorsFilter = document.getElementById('collaborators-filter').value.toLowerCase();
+
+            let filteredPosts = jobPosts.filter(post => {
+                const taskOutlineMatch = !taskOutlineFilter || post.taskOutline.toLowerCase().includes(taskOutlineFilter);
+                const researchRequirementsMatch = !researchRequirementsFilter || post.researchRequirements.toLowerCase().includes(researchRequirementsFilter);
+                const collaboratorsMatch = !collaboratorsFilter || post.collaborators.toLowerCase().includes(collaboratorsFilter);
+                return taskOutlineMatch && researchRequirementsMatch && collaboratorsMatch &&
+                    (post.title.toLowerCase().includes(searchTerm) || post.description.toLowerCase().includes(searchTerm));
+            });
+
+            closeFilters(); // Close the filter modal after applying filters
+        }
+
+        function showFilters() {
+        document.getElementById("filterModal").style.display = "block";
+    }
+
+    function closeFilters() {
+        document.getElementById("filterModal").style.display = "none";
+    }
+    document.getElementById('search-button').addEventListener('click', applyFilters);
+
+    </script>
+</body>
+
+</html>
