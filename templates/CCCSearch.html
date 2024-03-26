@@ -125,18 +125,20 @@
 
 <body>
 
+    <!-- Combined Search and Filter Form -->
     <div class="search-container">
-        <input type="text" class="search-input" placeholder="Search job posts...">
-        <button class="search-button" id="search-button">Search</button>
-        <button class="filter-button" onclick="showFilters()">Filters</button>
+        <input type="text" class="search-input" name="search" form="searchForm" placeholder="Search job posts...">
+        <!-- Removed the separate filter button -->
         <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
     </div>
 
-    <form action="/" method="get">
-        <input type="text" name="search" placeholder="Enter keyword...">
-        <button type="submit">Search</button>
+    <!-- The form now includes both search and filter inputs -->
+    <form id="searchForm" action="/" method="get">
+        <input type="text" name="taskOutline" placeholder="Task Outline...">
+        <input type="text" name="researchRequirements" placeholder="Research Requirements...">
+        <input type="text" name="collaborators" placeholder="Collaborators...">
+        <button type="submit">Search/Filter</button>
     </form>
-    
 
     <div id="search-results">
         <!-- Dynamically generated job posts from Flask -->
@@ -147,13 +149,11 @@
                 {{ post.title }}</h4>
             <p class="post-description">{{ post.description }}</p>
             <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
-            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}
-            </p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
             <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
         </div>
         {% endfor %}
     </div>
-
     <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">

@@ -17,10 +17,10 @@ def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Retrieve the search keyword from query parameters
-    search_keyword = request.args.get('search', '')
+    # Retrieve the unified search term from the query parameters
+    search_term = request.args.get('search', '')
     
-    # Construct the SQL query
+    # Modify the SQL query to search across multiple fields
     query = """
     SELECT * FROM posts
     WHERE 
@@ -30,11 +30,8 @@ def home():
         collaborators LIKE %s
     """
     
-    # Use the same search keyword for all columns
-    like_pattern = f'%{search_keyword}%'
-    query_params = [like_pattern, like_pattern, like_pattern, like_pattern]
-    
-    cursor.execute(query, query_params)
+    like_pattern = f'%{search_term}%'
+    cursor.execute(query, (like_pattern, like_pattern, like_pattern, like_pattern))
     
     job_posts = cursor.fetchall()
     cursor.close()
