@@ -17,20 +17,24 @@ def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    search = request.args.get('search', default='%')
-    task_outline = request.args.get('taskOutline', default='%')  # Adjusted to taskOutline
-    research_requirements = request.args.get('researchRequirements', default='%')  # Adjusted to researchRequirements
-    collaborators = request.args.get('collaborators', default='%')
+    # Retrieve the search keyword from query parameters
+    search_keyword = request.args.get('search', '')
     
+    # Construct the SQL query
     query = """
     SELECT * FROM posts
     WHERE 
-        title LIKE %s AND
-        taskOutline LIKE %s AND 
-        researchRequirements LIKE %s AND 
+        title LIKE %s OR
+        taskOutline LIKE %s OR
+        researchRequirements LIKE %s OR
         collaborators LIKE %s
     """
-    cursor.execute(query, (search, task_outline, research_requirements, collaborators))
+    
+    # Use the same search keyword for all columns
+    like_pattern = f'%{search_keyword}%'
+    query_params = [like_pattern, like_pattern, like_pattern, like_pattern]
+    
+    cursor.execute(query, query_params)
     
     job_posts = cursor.fetchall()
     cursor.close()

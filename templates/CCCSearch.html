@@ -132,15 +132,11 @@
         <a href="CCCDashboard.html" class="back-button">Return to Dashboard</a>
     </div>
 
-    <div class="filter-form">
-        <form action="/" method="get">
-            <input type="text" name="search" placeholder="Search title...">
-            <input type="text" name="taskOutline" placeholder="Task Outline...">
-            <input type="text" name="researchRequirements" placeholder="Research Requirements...">
-            <input type="text" name="collaborators" placeholder="Collaborators...">
-            <button type="submit">Filter</button>
-        </form>
-    </div>
+    <form action="/" method="get">
+        <input type="text" name="search" placeholder="Enter keyword...">
+        <button type="submit">Search</button>
+    </form>
+    
 
     <div id="search-results">
         <!-- Dynamically generated job posts from Flask -->
