@@ -40,7 +40,7 @@ def get_db_connection():
 def home():
     # Use the fake data instead of database data for testing
     job_posts = fake_job_posts
-    return render_template('CCCSearch.html', job_posts=job_posts)
+    return render_template('login.html', job_posts=job_posts)
 
 
 
