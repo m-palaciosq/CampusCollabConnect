@@ -170,45 +170,19 @@
         </div>
     </div>
 
-<!-- The Filter Modal -->
-<div id="filterModal" class="modal">
-    <!-- Modal content -->
-    <div class="modal-content">
-        <span class="close" onclick="closeFilters()">&times;</span>
-        <h3>Filter Options</h3>
-        <div>
-            <h4>Task Outline:</h4>
-            <!-- Ensure the input ID matches what you expect in your JavaScript and Flask app -->
-            <input type="text" id="task-outline-filter" name="task_outline" placeholder="Task Outline">
-        </div>
-        <div>
-            <h4>Research Requirements:</h4>
-            <!-- Ensure the input ID matches what you expect in your JavaScript and Flask app -->
-            <input type="text" id="research-requirements-filter" name="research_requirements" placeholder="Research Requirements">
-        </div>
-        <div>
-            <h4>Collaborators:</h4>
-            <!-- Ensure the input ID matches what you expect in your JavaScript and Flask app -->
-            <input type="text" id="collaborators-filter" name="collaborators" placeholder="Collaborators">
-        </div>
-        <!-- Add an ID to your button for easier JavaScript targeting -->
-        <button id="apply-filters-btn" onclick="applyFilters()">Apply Filters</button>
-    </div>
-</div>
-
     <script>
         document.getElementById('search-button').addEventListener('click', function () {
             // Get the search term from the input field
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-
+    
             // Get all the job post titles within the page
             const jobPosts = document.querySelectorAll('.post-title');
-
+    
             // Loop through all job posts and toggle visibility based on the search term
             jobPosts.forEach(function (post) {
                 const postTitle = post.textContent.toLowerCase();
                 const postContainer = post.parentElement; // Assuming the title is a direct child of the post container
-
+    
                 // If the post title includes the search term, show it; otherwise, hide it
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = '';
@@ -217,77 +191,30 @@
                 }
             });
         });
-
+    
         function openJobPostDetailsModal(title, collaborators, description) {
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostAuthor').innerText = collaborators;
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
-
+    
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
-
-        function applyFilters() {
-    // Gather filter criteria from input fields
-    const searchTerm = document.querySelector('.search-input').value;
-    const taskOutlineFilter = document.getElementById('task-outline-filter').value;
-    const researchRequirementsFilter = document.getElementById('research-requirements-filter').value;
-    const collaboratorsFilter = document.getElementById('collaborators-filter').value;
-
-    // Use the Fetch API to send a request to your Flask route with the filter criteria
-    fetch('/filter', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            search: searchTerm,
-            task_outline: taskOutlineFilter,
-            research_requirements: researchRequirementsFilter,
-            collaborators: collaboratorsFilter,
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Assuming 'data' is an array of filtered job posts returned from the server
-        updateJobPosts(data);
-        closeFilters(); // Close the filter modal after applying filters
-    })
-    .catch(error => console.error('Error:', error));
-}
-
-function updateJobPosts(filteredPosts) {
-    const searchResults = document.getElementById('search-results');
-    searchResults.innerHTML = ''; // Clear existing posts
-
-    // Dynamically create and append posts to the 'search-results' container
-    filteredPosts.forEach(post => {
-        const postElement = document.createElement('div');
-        postElement.className = 'post-container';
-        postElement.innerHTML = `
-            <h4 class="post-title" onclick="openJobPostDetailsModal('${post.title}', '${post.collaborators}', '${post.description}')">${post.title}</h4>
-            <p class="post-description">${post.description}</p>
-            <p class="post-details">Task Outline: ${post.taskOutline || 'Not specified'}</p>
-            <p class="post-details">Research Requirements: ${post.researchRequirements || 'Not specified'}</p>
-            <p class="post-details">Collaborators: ${post.collaborators || 'Not specified'}</p>
-        `;
-        searchResults.appendChild(postElement);
-    });
-}
-
-
+    
         function showFilters() {
             document.getElementById("filterModal").style.display = "block";
         }
-
+    
         function closeFilters() {
             document.getElementById("filterModal").style.display = "none";
         }
-        document.getElementById('search-button').addEventListener('click', applyFilters);
-
+    
+        // Removed the applyFilters function since it's not needed
+        // Removed the event listener for 'search-button' since it's not needed
     </script>
+    
 </body>
 
 </html>
