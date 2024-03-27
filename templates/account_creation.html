@@ -5,110 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Creation</title>
     <style>
-        .container {
-          width: 50%;
-          margin: 0 auto;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        .form-group {
-          margin-bottom: 20px;
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         label {
-          display: block;
-          font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .input-error {
-          border: 1px solid red;
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
         }
     </style>
+</head>
+<body>
+    <form action="/create_account" method="post">
+        <h1>Create Your Account</h1>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required>
+
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required>
+
+        <input type="submit" value="Create Account">
+    </form>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function() {
-          $('#accountForm').submit(function(e) {
-            e.preventDefault(); // Prevent form submission
+            $('#accountCreationForm').submit(function(event) {
+                event.preventDefault(); 
 
-            // Reset any previous errors
-            $('input').removeClass('input-error');
+                var formData = $(this).serialize();
 
-            // Get form values
-            var firstName = $('#firstName').val();
-            var lastName = $('#lastName').val();
-            var email = $('#email').val();
-            var password = $('#password').val();
-            var confirmPassword = $('#confirmPassword').val();
-
-            // Simple email validation
-            if (!email.endsWith('@uncg.edu')) {
-              $('#email').addClass('input-error');
-              return; // Stop execution if email is invalid
-            }
-
-            // Password match validation
-            if (password !== confirmPassword) {
-              $('#password, #confirmPassword').addClass('input-error');
-              return; // Stop execution if passwords don't match
-            }
-
-            // If all validations pass, send data to server
-            $.ajax({
-              type: 'POST',
-              url: 'account_creation_backend.py',
-              data: {
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password
-              },
-              success: function(response) {
-                // Handle success response here
-                console.log(response);
-              },
-              error: function(xhr, status, error) {
-                    if (xhr.status === 0) {
-                        console.error('Connection error: Check your internet connection.');
-                    } else if (xhr.status === 404) {
-                        console.error('Requested page not found [404].');
-                    } else if (xhr.status === 500) {
-                        console.error('Internal Server Error [500].');
-                    } else {
-                        console.error('Unknown error occurred:', error);
+                $.ajax({
+                    type: 'POST',
+                    url: '/create_account',
+                    data: formData,
+                    success: function(response) {
+                        alert(response); 
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
                     }
-                }
+                });
             });
-          });
         });
     </script>
-</head>
-<body>
-
-<div class="container">
-  <h2>Create an Account</h2>
-  <form id="accountForm" action="account_creation_backend.py" method="post">
-    <div class="form-group">
-      <label for="firstName">First Name:</label>
-      <input type="text" class="form-control" id="firstName" name="firstName" required>
-    </div>
-    <div class="form-group">
-      <label for="lastName">Last Name:</label>
-      <input type="text" class="form-control" id="lastName" name="lastName" required>
-    </div>
-    <div class="form-group">
-      <label for="email">Email:</label>
-      <input type="email" class="form-control" id="email" name="email" required>
-    </div>
-    <div class="form-group">
-      <label for="password">Password:</label>
-      <input type="password" class="form-control" id="password" name="password" required>
-    </div>
-    <div class="form-group">
-      <label for="confirmPassword">Confirm Password:</label>
-      <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
-</div>
-
 </body>
 </html>
