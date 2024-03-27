@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
 from mysql.connector import Error
 import dbConn
@@ -17,7 +17,28 @@ def create_user(email, password, first_name, last_name):
         cursor.execute(sql_query, (email, password, first_name, last_name))
         connection.commit()
 
-        return "User account created successfully!"
+        return redirect(url_for('login'))
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+        return "Error occurred"
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+
+def authenticate_user(email, password):
+    try:
+        connection, cursor = dbConn.get_connection()
+
+        cursor.execute("SELECT * FROM users WHERE email = %s AND p_word = %s", (email, password))
+        user = cursor.fetchone()
+
+        if user:
+            return redirect(url_for('cccdashboard'))
+        else:
+            return "Invalid email or password"
 
     except Error as e:
         print("Error while connecting to MySQL", e)
@@ -41,6 +62,21 @@ def create_account():
 
     result = create_user(email, password, first_name, last_name)
     return result
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        result = authenticate_user(email, password)
+        return result
+
+    return render_template('login.html')
+
+@app.route('/cccdashboard')
+def cccdashboard():
+    return render_template('CCCDashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
