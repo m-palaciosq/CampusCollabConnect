@@ -21,7 +21,7 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        input[type="text"],
+        input[type="email"],
         input[type="password"] {
             width: 100%;
             padding: 10px;
@@ -30,7 +30,7 @@
             border-radius: 3px;
             box-sizing: border-box;
         }
-        button {
+        input[type="submit"] {
             width: 100%;
             padding: 10px;
             background-color: #007bff;
@@ -39,7 +39,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        button:hover {
+        input[type="submit"]:hover {
             background-color: #0056b3;
         }
         .error-message {
@@ -47,37 +47,46 @@
             margin-bottom: 10px;
         }
     </style>
+</head>
+<body>
+    <div id="login-container">
+        <h2>Welcome to C.C.C</h2>
+        <form id="loginForm">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+
+            <input type="submit" value="Login">
+        </form>
+        
+        <p>Don't have an account? Click <a href="/account_creation">here</a> to create one.</p>
+
+        <div id="loginMessage" class="error-message"></div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function() {
-            $('#loginForm').submit(function(e) {
-                e.preventDefault();
-                var email = $('#email').val();
-                var password = $('#password').val();
+            $('#loginForm').submit(function(event) {
+                event.preventDefault(); 
 
-                if (email === 'user@uncg.edu' && password === 'password') {
-                    window.location.href = "CCCDashboard.html";
-                } else {
-                    $('.error-message').text('Invalid email or password');
-                }
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/login',
+                    data: formData,
+                    success: function(response) {
+                        $('#loginMessage').text(response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
             });
         });
     </script>
-</head>
-<body>
-
-<div id="login-container">
-    <h2>Welcome to C.C.C</h2>
-    <form id="loginForm">
-        <input type="text" id="email" name="email" placeholder="Email" required>
-        <input type="password" id="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-        <div class="error-message"></div>
-    </form>
-    <div class="create-account-link">
-        Don't have an account? <a href="account_creation.html">Create one</a>
-    </div>
-</div>
-
 </body>
 </html>
