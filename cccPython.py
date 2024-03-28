@@ -24,6 +24,8 @@ def login():
         password = request.form['password']
         result = authenticate_user(email, password)
         return result
+    if request.method == 'POST':
+        return redirect(url_for('dashboard'))
     return render_template('login.html')
 
 @app.route('/dashboard')
