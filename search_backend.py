@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
+import mysql.connector
 from werkzeug.utils import secure_filename
 import os
-import mysql.connector
 
 app = Flask(__name__)
+# Make sure to set a secret key for flash messages to work correctly
+app.secret_key = 'your_secret_key_here'
 
 def get_db_connection():
     connection = mysql.connector.connect(
@@ -25,11 +27,12 @@ def submit_resume():
         return redirect(request.url)
     if file:
         filename = secure_filename(file.filename)
-        # Ensure the directory exists or create it
-        save_path = os.path.join('path/to/save', filename)
+        # Ensure to replace '/path/to/save' with the actual directory you want to save files in.
+        save_path = os.path.join('/path/to/save', filename)
         file.save(save_path)
         flash('File uploaded successfully')
-        return redirect(url_for('dashboard'))  # Adjust the redirect as needed
+        # Adjust the redirect as necessary. Here redirecting back to home.
+        return redirect(url_for('home')) 
 
 @app.route('/')
 def home():
@@ -49,12 +52,6 @@ def home():
     cursor.close()
     conn.close()
     return render_template('CCCSearch.html', job_posts=job_posts)
-
-@app.route('/dashboard')
-def dashboard():
-    # Assuming 'dashboard.html' is the correct template name.
-    return render_template('CCCDashboard.html')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
