@@ -128,13 +128,11 @@
     <!-- Combined Search and Filter Form -->
 
     <form id="searchForm" action="/search" method="get">
-        
-    </form>
-
-    <div class="search-container">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
-        <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
-    </div>
+        <button type="submit" class="search-button">Search</button> <!-- Optional: Add a search button -->
+    </form>
+    <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
+    
 
     <!-- Display search results -->
     <div id="search-results">
