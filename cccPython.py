@@ -8,7 +8,7 @@ app.secret_key = 'your_secret_key'  # Replace 'your_secret_key' with a real secr
 # Using a unified database connection function
 def get_db_connection():
     connection = mysql.connector.connect(
-        host='localhost',  
+        host='127.0.0.1',  
         user='root',
         password='',      
         database='campuscollabconnect'
