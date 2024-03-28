@@ -131,7 +131,7 @@
         <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </div>
 
-    <form id="searchForm" action="/" method="get">
+     <form id="searchForm" action="/" method="get">
         
     </form>
 
@@ -153,51 +153,30 @@
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
             <h3 id="jobPostTitle"></h3>
             <p id="jobPostDescription"></p>
-            <!-- Form for resume submission -->
             <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
                 <label for="resumeFile">Attach your resume:</label>
                 <input type="file" id="resumeFile" name="resumeFile">
-                <!-- Include post ID if needed -->
-                <!-- <input type="hidden" id="postID" name="postID"> -->
                 <button type="submit">Submit Resume</button>
             </form>
         </div>
     </div>
 
     <script>
-        document.getElementById('search-button').addEventListener('click', function () {
-            // Get the search term from the input field
-            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-    
-            // Get all the job post titles within the page
-            const jobPosts = document.querySelectorAll('.post-title');
-    
-            // Loop through all job posts and toggle visibility based on the search term
-            jobPosts.forEach(function (post) {
-                const postTitle = post.textContent.toLowerCase();
-                const postContainer = post.parentElement; 
-    
-                if (postTitle.includes(searchTerm)) {
-                    postContainer.style.display = '';
-                } else {
-                    postContainer.style.display = 'none';
-                }
-            });
-        });
-    
+        // Function to open job post details modal
         function openJobPostDetailsModal(title, collaborators, description) {
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostDescription').innerText = description;
+            // Show the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
 
-    
+        // Function to close job post details modal
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
 
-         // Add event listener to search input field
-         document.querySelector('.search-input').addEventListener('keypress', function(event) {
+        // Add event listener to search input field
+        document.querySelector('.search-input').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
                 // Trigger search function here
                 search();
@@ -207,21 +186,20 @@
         // Function to perform search
         function search() {
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-            const jobPosts = document.querySelectorAll('.post-title');
+            const jobPosts = document.querySelectorAll('.post-container');
 
-            jobPosts.forEach(function(post) {
-                const postTitle = post.textContent.toLowerCase();
-                const postContainer = post.parentElement;
+            jobPosts.forEach(function(postContainer) {
+                const postTitle = postContainer.querySelector('.post-title').textContent.toLowerCase();
 
                 if (postTitle.includes(searchTerm)) {
-                    postContainer.style.display = '';
+                    postContainer.style.display = 'block';
                 } else {
                     postContainer.style.display = 'none';
                 }
             });
         }
-    
     </script>
+
     
 </body>
 
