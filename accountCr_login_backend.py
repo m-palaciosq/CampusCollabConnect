@@ -160,7 +160,7 @@ def submit_resume():
         return redirect(request.url) 
 
 
-@app.route('/search')
+@app.route('/')
 def search():
     conn, cursor = dbConn.get_connection()
     cursor.execute("SELECT * FROM posts")  # Adjust the table name and fields as necessary
