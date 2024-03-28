@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect
+from flask import Flask, render_template, request, flash, redirect, url_for
 import mysql.connector
 
 app = Flask(__name__)
@@ -59,7 +59,7 @@ def home():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('CCCDashboard.html')
+            return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)
