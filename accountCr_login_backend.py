@@ -4,34 +4,80 @@ import dbConn
 
 app = Flask(__name__)
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('CCCDashboard.html')
+@app.route('/')
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
 
-@app.route('/manage_posts')
-def manage_posts():
-    return render_template('mPostSelection.html')
+        result = authenticate_user(email, password)
+        
+        if result == "success":
+            return redirect(url_for('dashboard'))
+        else:
+            return result
 
-@app.route('/sign_out')
-def sign_out():
-    return redirect(url_for('login'))
+    return render_template('login.html')
 
-@app.route('/search_posts')
-def search_posts():
-    return render_template('CCCSearch.html')
+# part of login
+def authenticate_user(email, password):
+    try:
+        conn, cursor = dbConn.get_connection()
 
-@app.route('/search')
-def search():
-    conn, cursor = dbConn.get_connection()
-    cursor.execute("SELECT * FROM posts")  # Adjust the table name and fields as necessary
-    job_posts = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    
-    # Ensure job_posts is not empty and contains the correct fields
-    print(job_posts)
-    
-    return render_template('CCCSearch.html', job_posts=job_posts)
+        cursor.execute("SELECT * FROM users WHERE email = %s AND p_word = %s", (email, password))
+        user = cursor.fetchone()
+
+        if user:
+            return "success"  # Authentication successful
+        else:
+            return "Invalid email or password"
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+        return "Error occurred"
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+def create_user(email, password, first_name, last_name):
+    try:
+        conn, cursor = dbConn.get_connection()
+
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        if cursor.fetchone():
+            return "Email already exists"
+
+        sql_query = "INSERT INTO users (email, p_word, firstName, lastName) VALUES (%s, %s, %s, %s)"
+        cursor.execute(sql_query, (email, password, first_name, last_name))
+        conn.commit()
+
+        return redirect(url_for('login'))
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+        return "Error occurred"
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/account_creation', methods=['GET'])
+def account_creation_form():
+    return render_template('account_creation.html')
+
+@app.route('/create_account', methods=['POST'])
+def create_account():
+    email = request.form['email']
+    password = request.form['password']
+    first_name = request.form['firstName']
+    last_name = request.form['lastName']
+
+    result = create_user(email, password, first_name, last_name)
+    return result
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_project():
@@ -84,76 +130,34 @@ def insert_post(title, description, task_outline, research_requirements):
         cursor.close()
         conn.close()
 
-def create_user(email, password, first_name, last_name):
-    try:
-        conn, cursor = dbConn.get_connection()
+@app.route('/dashboard')
+def dashboard():
+    return render_template('CCCDashboard.html')
 
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
-        if cursor.fetchone():
-            return "Email already exists"
+@app.route('/manage_posts')
+def manage_posts():
+    return render_template('mPostSelection.html')
 
-        sql_query = "INSERT INTO users (email, p_word, firstName, lastName) VALUES (%s, %s, %s, %s)"
-        cursor.execute(sql_query, (email, password, first_name, last_name))
-        conn.commit()
+@app.route('/sign_out')
+def sign_out():
+    return redirect(url_for('login'))
 
-        return redirect(url_for('login'))
+@app.route('/search_posts')
+def search_posts():
+    return render_template('CCCSearch.html')
 
-    except Error as e:
-        print("Error while connecting to MySQL", e)
-        return "Error occurred"
-
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-
-# part of login
-def authenticate_user(email, password):
-    try:
-        conn, cursor = dbConn.get_connection()
-
-        cursor.execute("SELECT * FROM users WHERE email = %s AND p_word = %s", (email, password))
-        user = cursor.fetchone()
-
-        if user:
-            return redirect(url_for('dashboard'))
-        else:
-            return "Invalid email or password"
-
-    except Error as e:
-        print("Error while connecting to MySQL", e)
-        return "Error occurred"
-
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-
-@app.route('/account_creation', methods=['GET'])
-def account_creation_form():
-    return render_template('account_creation.html')
-
-@app.route('/create_account', methods=['POST'])
-def create_account():
-    email = request.form['email']
-    password = request.form['password']
-    first_name = request.form['firstName']
-    last_name = request.form['lastName']
-
-    result = create_user(email, password, first_name, last_name)
-    return result
-
-@app.route('/')
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        result = authenticate_user(email, password)
-        return result
-
-    return render_template('login.html')
+@app.route('/search')
+def search():
+    conn, cursor = dbConn.get_connection()
+    cursor.execute("SELECT * FROM posts")  # Adjust the table name and fields as necessary
+    job_posts = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    # Ensure job_posts is not empty and contains the correct fields
+    print(job_posts)
+    
+    return render_template('CCCSearch.html', job_posts=job_posts)
 
 if __name__ == '__main__':
     app.run(debug=True)

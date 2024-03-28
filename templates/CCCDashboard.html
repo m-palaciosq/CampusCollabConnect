@@ -39,18 +39,20 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="box" onclick="window.location.href='create_project.html';">Create Posts</div>
-    <div class="box" onclick="window.location.href='mPostSelection.html';">Manage Posts</div>
-    <div class="box" onclick="window.location.href='CCCSearch.html';">Search Posts</div>
-</div>
-
-<button class="sign-out" onclick="window.location.href='login.html';">Sign Out</button>
+    <div class="dashboard">
+        <a href="/create" class="box">Create Posts</a>
+        <a href="/manage_posts" class="box">Manage Posts</a>
+        <a href="/search_posts" class="box">Search Posts</a>
+    </div>
+    
+    <a href="/sign_out" class="sign-out">Sign Out</a>
 
 </body>
 </html>
