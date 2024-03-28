@@ -6,7 +6,7 @@ app = Flask(__name__)
 def get_db_connection():
     connection = mysql.connector.connect(
         host='127.0.0.1',  
-        port='3307',       
+        port='3306',       
         user='root',
         password='',      
         database='campuscollabconnect'
@@ -16,7 +16,7 @@ def get_db_connection():
 def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM jobposts")
+    cursor.execute("SELECT * FROM posts")
     job_posts = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -27,7 +27,7 @@ def home():
 def search():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM jobposts")  # Adjust the table name and fields as necessary
+    cursor.execute("SELECT * FROM posts")  # Adjust the table name and fields as necessary
     job_posts = cursor.fetchall()
     cursor.close()
     conn.close()
