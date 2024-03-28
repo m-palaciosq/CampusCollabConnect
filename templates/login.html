@@ -51,7 +51,7 @@
 <body>
     <div id="login-container">
         <h2>Welcome to C.C.C</h2>
-        <form id="loginForm">
+        <form method="POST" action="/login">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required><br>
 
@@ -63,30 +63,6 @@
         
         <p>Don't have an account? Click <a href="/account_creation">here</a> to create one.</p>
 
-        <div id="loginMessage" class="error-message"></div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <script>
-        $(document).ready(function() {
-            $('#loginForm').submit(function(event) {
-                event.preventDefault(); 
-
-                var formData = $(this).serialize();
-
-                $.ajax({
-                    type: 'POST',
-                    url: '/login',
-                    data: formData,
-                    success: function(response) {
-                        $('#loginMessage').text(response);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>
