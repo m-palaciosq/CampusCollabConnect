@@ -6,7 +6,7 @@ app.secret_key = 'your_secret_key'  # Set a secret key for flashing messages
 
 def get_db_connection():
     connection = mysql.connector.connect(
-        host='localhost',
+        host='127.0.0.1',
         user='root',
         password='',
         database='campuscollabconnect'
