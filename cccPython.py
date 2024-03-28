@@ -17,7 +17,14 @@ def get_db_connection():
     return connection
 
 @app.route('/')
-
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        result = authenticate_user(email, password)
+        return result
+    return render_template('login.html')
 
 @app.route('/dashboard')
 def dashboard():
@@ -35,14 +42,7 @@ def sign_out():
 def search_posts():
     return render_template('CCCSearch.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        result = authenticate_user(email, password)
-        return result
-    return render_template('login.html')
+
 
 @app.route('/search')
 def search():
