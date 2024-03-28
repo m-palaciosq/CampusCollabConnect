@@ -125,43 +125,43 @@
 
 <body>
 
+    <body>
     <!-- Combined Search and Filter Form -->
     <div class="search-container">
-        <input type="text" class="search-input" name="search" form="searchForm" placeholder="Search job posts...">
+        <input type="text" class="search-input" name="search" placeholder="Search job posts...">
+        <button type="submit" class="search-button" form="searchForm">Search</button>
         <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </div>
 
-    <form id="searchForm" action="/" method="get">
-
+    <form id="searchForm" action="{{ url_for('search') }}" method="get">
+        <!-- You can add other form fields here for additional filtering if needed -->
     </form>
 
-    <div id="search-results">
-        {% for post in job_posts %}
-        <div class="post-container">
-            <h4 class="post-title"
-                onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">
-                {{ post.title }}</h4>
-            <p class="post-description">{{ post.description }}</p>
-            <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
-            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
-            <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
+    <body>
+        <!-- Search Form -->
+        <div id="search-results">
+            {% for post in job_posts %}
+            <div class="post-container">
+                <h4 class="post-title">{{ post.title }}</h4>
+                <p class="post-description">{{ post.description }}</p>
+            </div>
+            {% else %}
+            <p>No job posts found.</p>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
+    <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
             <h3 id="modalTitle"></h3>
             <p id="modalDescription"></p>
-            <form id="resumeSubmissionForm" enctype="multipart/form-data">
-                <input type="hidden" id="modalPostID" name="postID">
-                <label for="resumeFile">Attach your resume:</label>
-                <input type="file" id="resumeFile" name="resumeFile">
-                <button type="submit">Submit Request</button>
-            </form> 
+            <!-- Form for resume submission not shown for brevity -->
         </div>
     </div>
+
+</body>
+
 
     <script>
 

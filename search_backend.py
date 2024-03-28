@@ -34,32 +34,19 @@ def home():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Retrieve the unified search term from the query parameters
     search_term = request.args.get('search', '')
-    
-    # Modify the SQL query to search across multiple fields
     query = """
-    SELECT * FROM posts
-    WHERE 
-        title LIKE %s OR
-        taskOutline LIKE %s OR
-        researchRequirements LIKE %s OR
-        collaborators LIKE %s
+    SELECT title, description FROM posts
+    WHERE title LIKE %s OR
+          description LIKE %s
     """
-    
     like_pattern = f'%{search_term}%'
-    cursor.execute(query, (like_pattern, like_pattern, like_pattern, like_pattern))
+    cursor.execute(query, (like_pattern, like_pattern))
     
     job_posts = cursor.fetchall()
     cursor.close()
     conn.close()
     return render_template('CCCSearch.html', job_posts=job_posts)
-
-
-
-@app.route('/dashboard')
-def dashboard():
-            return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)
