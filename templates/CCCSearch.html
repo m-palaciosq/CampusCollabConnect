@@ -126,10 +126,15 @@
 <body>
 
     <!-- Combined Search and Filter Form -->
-    <form action="/search" method="get">
-        <input type="text" name="search" placeholder="Search job posts...">
-        <button type="submit">Search</button>
+
+    <form id="searchForm" action="/search" method="get">
+        
     </form>
+
+    <div class="search-container">
+        <input type="text" class="search-input" name="search" placeholder="Search job posts...">
+        <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
+    </div>
 
     <!-- Display search results -->
     <div id="search-results">
