@@ -195,6 +195,31 @@
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
+
+         // Add event listener to search input field
+         document.querySelector('.search-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                // Trigger search function here
+                search();
+            }
+        });
+
+        // Function to perform search
+        function search() {
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+            const jobPosts = document.querySelectorAll('.post-title');
+
+            jobPosts.forEach(function(post) {
+                const postTitle = post.textContent.toLowerCase();
+                const postContainer = post.parentElement;
+
+                if (postTitle.includes(searchTerm)) {
+                    postContainer.style.display = '';
+                } else {
+                    postContainer.style.display = 'none';
+                }
+            });
+        }
     
     </script>
     
