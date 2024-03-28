@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,20 +7,10 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-    
     <header>
         <nav>
             <ul>
-                <li><a href="index.html">Home</a></li>
+                <li><a href="CCCDashboard.html">Home</a></li>
                 <li><a href="create_project.html">Create Project</a></li>
                 <li><a href="contact.html">Contact</a></li>
                 <li><a href="about.html">About</a></li>
@@ -30,27 +21,21 @@
         <section>
             <div class="container">
                 <h1>Create a New Project</h1>
-             <!-- ... this code has been changed ... -->
-<form id="create-project-form" action="{{ url_for('create_project') }}" method="post">
-    <label for="title">Project Title:</label>
-    <input type="text" id="title" name="title" required>
-    
-    <label for="description">Project Description:</label>
-    <textarea id="description" name="description" required></textarea>
-    
-    <label for="task_outline">Task Outline:</label>
-    <textarea id="task_outline" name="task_outline" required></textarea>
-    
-    <label for="research_requirements">Research Requirements:</label>
-    <textarea id="research_requirements" name="research_requirements"></textarea>
-    
-    <label for="collaborators">Collaborators:</label>
-    <input type="text" id="collaborators" name="collaborators">
-    
-    <button type="submit">Create Project</button>
-</form>
-<!-- ... this code has been changed ... -->
-
+                <form id="create-project-form" action="{{ url_for('create_project') }}" method="post">
+                    <label for="title">Project Title:</label>
+                    <input type="text" id="title" name="title" required>
+                    
+                    <label for="description">Project Description:</label>
+                    <textarea id="description" name="description" required></textarea>
+                    
+                    <label for="task_outline">Task Outline:</label>
+                    <textarea id="task_outline" name="task_outline" required></textarea>
+                    
+                    <label for="research_requirements">Research Requirements:</label>
+                    <textarea id="research_requirements" name="research_requirements" required></textarea>
+                    
+                    <button type="submit">Create Project</button>
+                </form>
             </div>
         </section>
     </main>
@@ -59,8 +44,5 @@
             <p>&copy; 2024 Campus, Collab, Connect</p>
         </div>
     </footer>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>
