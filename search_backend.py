@@ -26,7 +26,7 @@ def submit_resume():
         flash('File uploaded successfully', 'success')
         return redirect(request.url) 
 
-@app.route('/search')
+@app.route('/')
 def search():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
