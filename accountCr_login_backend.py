@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from mysql.connector import Error
 import dbConn
 
@@ -146,10 +146,35 @@ def sign_out():
 def search_posts():
     return render_template('CCCSearch.html')
 
+@app.route('/submit_resume', methods=['POST'])
+def submit_resume():
+    if 'resumeFile' not in request.files:
+        flash('No file part', 'error')
+        return redirect(request.url)
+    file = request.files['resumeFile']
+    if file.filename == '':
+        flash('No selected file', 'error')
+        return redirect(request.url)
+    if file:
+        flash('File uploaded successfully', 'success')
+        return redirect(request.url) 
+
+
 @app.route('/search')
 def search():
     conn, cursor = dbConn.get_connection()
     cursor.execute("SELECT * FROM posts")  # Adjust the table name and fields as necessary
+
+    search_term = request.args.get('search', '')
+    like_pattern = f'%{search_term}%'
+    
+    query = """
+    SELECT title, description FROM posts
+    WHERE 
+        title LIKE %s OR
+        description LIKE %s
+    """
+    
     job_posts = cursor.fetchall()
     cursor.close()
     conn.close()
