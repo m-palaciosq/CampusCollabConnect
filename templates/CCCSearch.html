@@ -137,13 +137,15 @@
     <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
-        <div class="post-container">
-            <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">
-                {{ post.title }}</h4>
-            <p class="post-description">{{ post.description }}</p>
-            <!-- Display other post details -->
-        </div>
-        {% endfor %}
+    <div class="post-container">
+        <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.postID }}')">
+            {{ post.title }}
+        </h4>
+        <p class="post-description">{{ post.description }}</p>
+        <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
+        <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
+    </div>
+    {% endfor %}
     </div>
 
     <!-- Job Post Details Modal -->
@@ -152,23 +154,40 @@
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
             <h3 id="jobPostTitle"></h3>
             <p id="jobPostDescription"></p>
+            <div id="jobPostDetails">
+                <h4>Tasks</h4>
+                <p id="jobPostTasks"></p>
+                <h4>Research Requirements</h4>
+                <p id="jobPostRequirements"></p>
+            </div>
             <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
-                <label for="resumeFile">Attach your resume:</label>
-                <input type="file" id="resumeFile" name="resumeFile">
-                <button type="submit">Submit Resume</button>
+                <input type="hidden" name="postID" id="jobPostIdForResume" value="">
+                <div class="form-group">
+                    <label for="resumeFile">Attach your resume:</label>
+                    <input type="file" id="resumeFile" name="resumeFile" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Resume</button>
             </form>
         </div>
     </div>
 
+
     <script>
         // Function to open job post details modal
-        function openJobPostDetailsModal(title, collaborators, description) {
-            document.getElementById('jobPostTitle').innerText = title;
-            document.getElementById('jobPostDescription').innerText = description;
+        function openJobPostDetailsModal(element) {
+            // Extracting data attributes from the clicked element's parent container
+            const postContainer = element.closest('.post-container');
+            const tasks = postContainer.getAttribute('data-tasks');
+            const requirements = postContainer.getAttribute('data-requirements');
+        
+            // Setting the innerText for tasks and requirements in the modal
+            document.getElementById('jobPostTitle').innerText = element.textContent; // The title is the text of the clicked element
+            document.getElementById('jobPostDescription').innerText = postContainer.querySelector('.post-description').textContent;
+            document.getElementById('jobPostTasks').innerText = tasks;
+            document.getElementById('jobPostRequirements').innerText = requirements;
             // Show the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
-
         // Function to close job post details modal
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";

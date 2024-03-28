@@ -162,27 +162,36 @@ def submit_resume():
 
 @app.route('/search')
 def search():
-    conn, cursor = dbConn.get_connection()
-    cursor.execute("SELECT * FROM posts")  # Adjust the table name and fields as necessary
-
     search_term = request.args.get('search', '')
     like_pattern = f'%{search_term}%'
-    
+
+    conn, cursor = dbConn.get_connection()
+
     query = """
-    SELECT title, description FROM posts
-    WHERE 
-        title LIKE %s OR
-        description LIKE %s
+    SELECT p.postID, p.title, p.description,
+           GROUP_CONCAT(DISTINCT t.taskDescription SEPARATOR '; ') AS tasks,
+           GROUP_CONCAT(DISTINCT r.requirementDesc SEPARATOR '; ') AS requirements
+    FROM posts AS p
+    LEFT JOIN tasks AS t ON p.postID = t.postID
+    LEFT JOIN researchReqs AS r ON p.postID = r.postID
+    WHERE p.title LIKE %s OR p.description LIKE %s
+    GROUP BY p.postID
+    ORDER BY p.postID
     """
-    
+    cursor.execute(query, (like_pattern, like_pattern))
+
     job_posts = cursor.fetchall()
+
     cursor.close()
     conn.close()
-    
-    # Ensure job_posts is not empty and contains the correct fields
-    print(job_posts)
-    
-    return render_template('CCCSearch.html', job_posts=job_posts)
+
+    # Transforming the result into a list of dictionaries for easier handling in the template
+    job_posts_dicts = [
+        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4]}
+        for post in job_posts
+    ]
+
+    return render_template('CCCSearch.html', job_posts=job_posts_dicts)
 
 if __name__ == '__main__':
     app.run(debug=True)
