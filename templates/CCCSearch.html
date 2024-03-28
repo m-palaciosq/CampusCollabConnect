@@ -125,76 +125,59 @@
 
 <body>
 
-    <body>
     <!-- Combined Search and Filter Form -->
     <div class="search-container">
-        <input type="text" class="search-input" name="search" placeholder="Search job posts...">
-        <button type="submit" class="search-button" form="searchForm">Search</button>
+        <input type="text" class="search-input" name="search" form="searchForm" placeholder="Search job posts...">
         <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </div>
 
-    <form id="searchForm" action="{{ url_for('search') }}" method="get">
-        <!-- You can add other form fields here for additional filtering if needed -->
+    <form id="searchForm" action="/" method="get">
+        
     </form>
 
-    <body>
-        <!-- Search Form -->
-        <div id="search-results">
-            {% for post in job_posts %}
-            <div class="post-container">
-                <h4 class="post-title">{{ post.title }}</h4>
-                <p class="post-description">{{ post.description }}</p>
-            </div>
-            {% else %}
-            <p>No job posts found.</p>
-            {% endfor %}
+    <div id="search-results">
+        {% for post in job_posts %}
+        <div class="post-container">
+            <h4 class="post-title"
+                onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">
+                {{ post.title }}</h4>
+            <p class="post-description">{{ post.description }}</p>
+            <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
+            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
+            <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
         </div>
+        {% endfor %}
+    </div>
 
     <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
-            <h3 id="modalTitle"></h3>
-            <p id="modalDescription"></p>
-            <!-- Form for resume submission not shown for brevity -->
+            <h3 id="jobPostTitle"></h3>
+            <p id="jobPostDescription"></p>
+            <!-- Updated form for resume submission -->
+            <form id="resumeSubmissionForm" enctype="multipart/form-data">
+                <label for="resumeFile">Attach your resume:</label>
+                <input type="file" id="resumeFile" name="resumeFile">
+                <input type="hidden" id="postID" name="postID">
+                <button type="button" onclick="submitResume()">Submit Request</button>
+            </form>
         </div>
     </div>
 
-</body>
-
-
     <script>
-
-        function openJobPostDetailsModal(title, description, postId) {
-            document.getElementById('modalTitle').innerText = title;
-            document.getElementById('modalDescription').innerText = description;
-            document.getElementById('modalPostID').value = postId;
-            document.getElementById('jobPostDetailsModal').style.display = 'block';
-        }
-
-        function closeJobPostDetailsModal() {
-            document.getElementById('jobPostDetailsModal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-        var modal = document.getElementById('jobPostDetailsModal');
-        if (event.target == modal) {
-            closeJobPostDetailsModal();
-        }
-    }
-
         document.getElementById('search-button').addEventListener('click', function () {
             // Get the search term from the input field
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-
+    
             // Get all the job post titles within the page
             const jobPosts = document.querySelectorAll('.post-title');
-
+    
             // Loop through all job posts and toggle visibility based on the search term
             jobPosts.forEach(function (post) {
                 const postTitle = post.textContent.toLowerCase();
-                const postContainer = post.parentElement;
-
+                const postContainer = post.parentElement; 
+    
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = '';
                 } else {
@@ -202,8 +185,27 @@
                 }
             });
         });
+    
+        function openJobPostDetailsModal(title, collaborators, description) {
+            document.getElementById('jobPostTitle').innerText = title;
+            document.getElementById('jobPostAuthor').innerText = collaborators;
+            document.getElementById('jobPostDescription').innerText = description;
+        }
+    
+        function closeJobPostDetailsModal() {
+            document.getElementById('jobPostDetailsModal').style.display = "none";
+        }
+    
+        function showFilters() {
+            document.getElementById("filterModal").style.display = "block";
+        }
+    
+        function closeFilters() {
+            document.getElementById("filterModal").style.display = "none";
+        }
+    
     </script>
-
+    
 </body>
 
 </html>
