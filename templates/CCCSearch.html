@@ -127,24 +127,18 @@
 
     <!-- Combined Search and Filter Form -->
     <div class="search-container">
-        <input type="text" class="search-input" name="search" form="searchForm" placeholder="Search job posts...">
+        <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </div>
 
-    <form id="searchForm" action="/" method="get">
-        
-    </form>
-
+    <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
         <div class="post-container">
-            <h4 class="post-title"
-                onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">
+            <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.title }}', '{{ post.collaborators }}', '{{ post.description }}')">
                 {{ post.title }}</h4>
             <p class="post-description">{{ post.description }}</p>
-            <p class="post-details">Task Outline: {{ post.taskOutline | default('Not specified') }}</p>
-            <p class="post-details">Research Requirements: {{ post.researchRequirements | default('Not specified') }}</p>
-            <p class="post-details">Collaborators: {{ post.collaborators | default('Not specified') }}</p>
+            <!-- Display other post details -->
         </div>
         {% endfor %}
     </div>
@@ -155,12 +149,13 @@
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
             <h3 id="jobPostTitle"></h3>
             <p id="jobPostDescription"></p>
-            <!-- Updated form for resume submission -->
-            <form id="resumeSubmissionForm" enctype="multipart/form-data">
+            <!-- Form for resume submission -->
+            <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
                 <label for="resumeFile">Attach your resume:</label>
                 <input type="file" id="resumeFile" name="resumeFile">
-                <input type="hidden" id="postID" name="postID">
-                <button type="button" onclick="submitResume()">Submit Request</button>
+                <!-- Include post ID if needed -->
+                <!-- <input type="hidden" id="postID" name="postID"> -->
+                <button type="submit">Submit Resume</button>
             </form>
         </div>
     </div>
@@ -188,24 +183,17 @@
     
         function openJobPostDetailsModal(title, collaborators, description) {
             document.getElementById('jobPostTitle').innerText = title;
-            document.getElementById('jobPostAuthor').innerText = collaborators;
             document.getElementById('jobPostDescription').innerText = description;
+            document.getElementById('jobPostDetailsModal').style.display = "block";
         }
+
     
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
-        }
-    
-        function showFilters() {
-            document.getElementById("filterModal").style.display = "block";
-        }
-    
-        function closeFilters() {
-            document.getElementById("filterModal").style.display = "none";
         }
     
     </script>
     
 </body>
 
-</html>
+</html> 
