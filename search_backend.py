@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
+from werkzeug.utils import secure_filename
+import os
 import mysql.connector
 
 app = Flask(__name__)
@@ -14,20 +16,20 @@ def get_db_connection():
 
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
-    # Check if the post request has the file part
     if 'resumeFile' not in request.files:
         flash('No file part')
         return redirect(request.url)
     file = request.files['resumeFile']
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
     if file.filename == '':
         flash('No selected file')
         return redirect(request.url)
     if file:
-        # Save the file to a secure location, process as needed
-        # For example: file.save(os.path.join('/path/to/save', file.filename))
-        return 'File uploaded successfully' 
+        filename = secure_filename(file.filename)
+        # Ensure the directory exists or create it
+        save_path = os.path.join('path/to/save', filename)
+        file.save(save_path)
+        flash('File uploaded successfully')
+        return redirect(url_for('dashboard'))  # Adjust the redirect as needed
 
 @app.route('/')
 def home():
@@ -47,6 +49,12 @@ def home():
     cursor.close()
     conn.close()
     return render_template('CCCSearch.html', job_posts=job_posts)
+
+@app.route('/dashboard')
+def dashboard():
+    # Assuming 'dashboard.html' is the correct template name.
+    return render_template('CCCDashboard.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
