@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-from werkzeug.utils import secure_filename
-import os 
 from mysql.connector import Error
 import dbConn
 import key
@@ -163,60 +161,18 @@ def sign_out():
 def search_posts():
     return render_template('CCCSearch.html')
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app_uploads')
-
-from flask import Flask, request, flash, redirect, url_for, session
-from werkzeug.utils import secure_filename
-import os
-
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'
-
-# Assuming UPLOAD_FOLDER is correctly set up as shown in previous messages
-app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'app_uploads')
-
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
     if 'resumeFile' not in request.files:
         flash('No file part', 'error')
         return redirect(request.url)
-    
     file = request.files['resumeFile']
     if file.filename == '':
         flash('No selected file', 'error')
         return redirect(request.url)
-    
-    if file and 'userID' in session:
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        
-        # Save the file
-        file.save(file_path)
-        
-        # Retrieve userID from session and postID from form
-        userID = session['userID']
-        postID = request.form.get('postID', type=int) 
-        
-        if postID is None:
-            flash('No postID provided', 'error')
-            return redirect(request.url)
-        
-        # Database connection and file path insertion example
-        # Ensure dbConn.get_connection() is defined and properly secured
-        conn, cursor = dbConn.get_connection()
-        query = "INSERT INTO resumes (userID, postID, resumeFile, resumeType) VALUES (%s, %s, %s, %s)"
-        cursor.execute(query, (userID, postID, file_path, 'pdf'))  # Assuming resumeType is known; adjust as needed
-        conn.commit()
-        cursor.close()
-        conn.close()
-        
-        flash('Resume uploaded successfully', 'success')
-    else:
-        flash('Error uploading file or user not logged in', 'error')
-
-    return redirect(request.url)
-
-
+    if file:
+        flash('File uploaded successfully', 'success')
+        return redirect(request.url) 
 
 
 @app.route('/search')
