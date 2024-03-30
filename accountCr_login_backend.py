@@ -165,9 +165,18 @@ def search_posts():
 
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app_uploads')
 
+from flask import Flask, request, flash, redirect, url_for, session
+from werkzeug.utils import secure_filename
+import os
+
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Assuming UPLOAD_FOLDER is correctly set up as shown in previous messages
+app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'app_uploads')
+
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
-    # Check if the form has the file part
     if 'resumeFile' not in request.files:
         flash('No file part', 'error')
         return redirect(request.url)
@@ -177,40 +186,36 @@ def submit_resume():
         flash('No selected file', 'error')
         return redirect(request.url)
     
-    if file:
-        # Ensure the filename is safe
+    if file and 'userID' in session:
         filename = secure_filename(file.filename)
-        
-        # Define where to save the file
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        
-        # Ensure the directory exists
-        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-            os.makedirs(app.config['UPLOAD_FOLDER'])
         
         # Save the file
         file.save(file_path)
         
-        # Determine the file type (extension)
-        resume_type = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'unknown'
-
-        # Insert file path and type into the database
-        conn, cursor = dbConn.get_connection()
-        # Placeholder values for userID and postID - replace these as needed
-        userID = 1
-        postID = 1
-        query = "INSERT INTO resumes (userID, postID, resumeFile, resumeType) VALUES (%s, %s, %s, %s)"
-        cursor.execute(query, (userID, postID, file_path, resume_type))
-        conn.commit()
+        # Retrieve userID from session and postID from form
+        userID = session['userID']
+        postID = request.form.get('postID', type=int) 
         
+        if postID is None:
+            flash('No postID provided', 'error')
+            return redirect(request.url)
+        
+        # Database connection and file path insertion example
+        # Ensure dbConn.get_connection() is defined and properly secured
+        conn, cursor = dbConn.get_connection()
+        query = "INSERT INTO resumes (userID, postID, resumeFile, resumeType) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (userID, postID, file_path, 'pdf'))  # Assuming resumeType is known; adjust as needed
+        conn.commit()
         cursor.close()
         conn.close()
         
         flash('Resume uploaded successfully', 'success')
     else:
-        flash('Error uploading file', 'error')
+        flash('Error uploading file or user not logged in', 'error')
 
     return redirect(request.url)
+
 
 
 
