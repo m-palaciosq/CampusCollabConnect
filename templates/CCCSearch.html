@@ -122,7 +122,7 @@
         }
     </style>
 </head>
-
+    
 <body>
 
     <!-- Combined Search and Filter Form -->
@@ -174,24 +174,26 @@
 
     <script>
         // Function to open job post details modal
-        function openJobPostDetailsModal(element) {
-            // Extracting data attributes from the clicked element's parent container
-            const postContainer = element.closest('.post-container');
-            const tasks = postContainer.getAttribute('data-tasks');
-            const requirements = postContainer.getAttribute('data-requirements');
-        
-            // Setting the innerText for tasks and requirements in the modal
-            document.getElementById('jobPostTitle').innerText = element.textContent; // The title is the text of the clicked element
-            document.getElementById('jobPostDescription').innerText = postContainer.querySelector('.post-description').textContent;
-            document.getElementById('jobPostTasks').innerText = tasks;
-            document.getElementById('jobPostRequirements').innerText = requirements;
-            // Show the modal
-            document.getElementById('jobPostDetailsModal').style.display = "block";
-        }
-        // Function to close job post details modal
-        function closeJobPostDetailsModal() {
-            document.getElementById('jobPostDetailsModal').style.display = "none";
-        }
+        function openJobPostDetailsModal(postID) {
+    // Find the post container using the postID if it's set as an id or data attribute
+    const postContainer = document.querySelector(`.post-container[data-postid="${postID}"]`);
+
+    // Extract details from data attributes
+    const title = postContainer.getAttribute('data-title');
+    const description = postContainer.getAttribute('data-description');
+    const tasks = postContainer.getAttribute('data-tasks');
+    const requirements = postContainer.getAttribute('data-requirements');
+
+    // Populate the modal fields
+    document.getElementById('jobPostTitle').innerText = title;
+    document.getElementById('jobPostDescription').innerText = description;
+    document.getElementById('jobPostTasks').innerText = tasks;
+    document.getElementById('jobPostRequirements').innerText = requirements;
+    document.getElementById('jobPostIdForResume').value = postID; // Assuming you have a hidden field for the postID
+
+    // Show the modal
+    document.getElementById('jobPostDetailsModal').style.display = "block";
+}
 
         // Add event listener to search input field
         document.querySelector('.search-input').addEventListener('keypress', function(event) {
