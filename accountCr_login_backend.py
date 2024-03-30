@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from werkzeug.utils import secure_filename
+import os
 from mysql.connector import Error
 import dbConn
 import key
@@ -163,16 +165,38 @@ def search_posts():
 
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
+    # Check if the form has the file part
     if 'resumeFile' not in request.files:
         flash('No file part', 'error')
         return redirect(request.url)
+    
     file = request.files['resumeFile']
     if file.filename == '':
         flash('No selected file', 'error')
         return redirect(request.url)
+    
     if file:
-        flash('File uploaded successfully', 'success')
-        return redirect(request.url) 
+        # Ensure the filename is safe
+        filename = secure_filename(file.filename)
+        # Define where to save the file
+        file_path = os.path.join('path/to/save/files', filename)
+        # Save the file
+        file.save(file_path)
+        
+        # Assuming you might still want to do something with the file path, like storing it in a database
+        # Here's a simplified example of how you might insert just the file path into a database
+        conn, cursor = dbConn.get_connection()
+        query = "INSERT INTO applications (resume_path) VALUES (%s)"
+        cursor.execute(query, (file_path,))
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+        
+        flash('Resume uploaded successfully', 'success')
+    else:
+        flash('Error uploading file', 'error')
+
 
 
 @app.route('/search')
