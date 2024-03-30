@@ -134,11 +134,11 @@
     <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
 
-    <!-- Display search results -->
-    <div id="search-results">
+     <!-- Display search results -->
+     <div id="search-results">
         {% for post in job_posts %}
-        <div class="post-container">
-            <h4 class="post-title" onclick="openJobPostDetailsModal('{{ post.postID }}')">
+        <div class="post-container" data-tasks="{{ post.tasks }}" data-requirements="{{ post.requirements }}">
+            <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
                 {{ post.title }}
             </h4>
             <p class="post-description">{{ post.description }}</p>
