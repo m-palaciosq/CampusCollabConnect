@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.utils import secure_filename
-import os
+import os 
 from mysql.connector import Error
 import dbConn
 import key
@@ -163,6 +163,8 @@ def sign_out():
 def search_posts():
     return render_template('CCCSearch.html')
 
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'app_uploads')
+
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
     # Check if the form has the file part
@@ -178,16 +180,27 @@ def submit_resume():
     if file:
         # Ensure the filename is safe
         filename = secure_filename(file.filename)
+        
         # Define where to save the file
-        file_path = os.path.join('path/to/save/files', filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Ensure the directory exists
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'])
+        
         # Save the file
         file.save(file_path)
         
-        # Assuming you might still want to do something with the file path, like storing it in a database
-        # Here's a simplified example of how you might insert just the file path into a database
+        # Determine the file type (extension)
+        resume_type = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'unknown'
+
+        # Insert file path and type into the database
         conn, cursor = dbConn.get_connection()
-        query = "INSERT INTO applications (resume_path) VALUES (%s)"
-        cursor.execute(query, (file_path,))
+        # Placeholder values for userID and postID - replace these as needed
+        userID = 1
+        postID = 1
+        query = "INSERT INTO resumes (userID, postID, resumeFile, resumeType) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (userID, postID, file_path, resume_type))
         conn.commit()
         
         cursor.close()
@@ -196,6 +209,8 @@ def submit_resume():
         flash('Resume uploaded successfully', 'success')
     else:
         flash('Error uploading file', 'error')
+
+    return redirect(request.url)
 
 
 
