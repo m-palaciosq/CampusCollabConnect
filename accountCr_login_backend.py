@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from mysql.connector import Error
 import dbConn
+import key
 
 app = Flask(__name__)
+app.secret_key = key.makeKey()
 
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
@@ -11,12 +13,13 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        result = authenticate_user(email, password)
+        user = authenticate_user(email, password)
         
-        if result == "success":
+        if user:
+            session['user_id'] = user['userID']
             return redirect(url_for('dashboard'))
         else:
-            return result
+            flash("Invalid email or password", "error")
 
     return render_template('login.html')
 
@@ -29,13 +32,21 @@ def authenticate_user(email, password):
         user = cursor.fetchone()
 
         if user:
-            return "success"  # Authentication successful
+            user_dict = {
+                'userID': user[0],
+                'email': user[1],
+                'p_word': user[2],
+                'firstName': user[3],
+                'lastName': user[4]
+            }
+            return user_dict
         else:
-            return "Invalid email or password"
+            return None
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-        return "Error occurred"
+        flash("Error occurred while connecting to the database", "error")
+        return None
 
     finally:
         if conn.is_connected():
@@ -83,12 +94,16 @@ def create_account():
 def create_project():
     if request.method == 'POST':
         try:
+            user_id = session.get('user_id')
+            if user_id is None:
+                return redirect(url_for('login'))
+
             title = request.form['title']
             description = request.form['description']
             task_outline = request.form['task_outline']
             research_requirements = request.form['research_requirements']
 
-            insert_post(title, description, task_outline, research_requirements)
+            insert_post(user_id, title, description, task_outline, research_requirements)
             return redirect(url_for('dashboard'))
 
         except Error as e:
@@ -97,15 +112,15 @@ def create_project():
 
     return render_template('create_project.html', error=None)
 
-def insert_post(title, description, task_outline, research_requirements):
+def insert_post(user_id, title, description, task_outline, research_requirements):
     try:
         conn, cursor = dbConn.get_connection()
 
         insert_query = """
-        INSERT INTO posts (title, description)
-        VALUES (%s, %s)
+        INSERT INTO posts (userID, title, description)
+        VALUES (%s, %s, %s)
         """
-        cursor.execute(insert_query, (title, description))
+        cursor.execute(insert_query, (user_id, title, description))
         post_id = cursor.lastrowid
 
         insert_query = """
