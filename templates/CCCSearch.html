@@ -148,6 +148,7 @@
         {% endfor %}
     </div>
 
+    <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
@@ -159,38 +160,17 @@
                 <h4>Research Requirements</h4>
                 <p id="jobPostRequirements"></p>
             </div>
-            <!-- Resume Submission Form -->
             <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
                 <input type="hidden" name="postID" id="jobPostIdForResume" value="">
-                
-                <!-- User Details Input Fields -->
-                <div class="form-group">
-                    <label for="firstName">First Name:</label>
-                    <input type="text" id="firstName" name="firstName" required>
-                </div>
-                <div class="form-group">
-                    <label for="lastName">Last Name:</label>
-                    <input type="text" id="lastName" name="lastName" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone Number:</label>
-                    <input type="text" id="phone" name="phone">
-                </div>
-                
-                <!-- Resume File Attachment -->
                 <div class="form-group">
                     <label for="resumeFile">Attach your resume:</label>
                     <input type="file" id="resumeFile" name="resumeFile" required>
                 </div>
-                
-                <button type="submit" class="btn btn-primary">Submit Application</button>
+                <button type="submit" class="btn btn-primary">Submit Resume</button>
             </form>
         </div>
     </div>
+
 
     <script>
         // Function to open job post details modal
