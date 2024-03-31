@@ -23,7 +23,6 @@ def login():
 
     return render_template('login.html')
 
-# part of login
 def authenticate_user(email, password):
     try:
         conn, cursor = dbConn.get_connection()
@@ -75,10 +74,6 @@ def create_user(email, password, first_name, last_name):
         if conn.is_connected():
             cursor.close()
             conn.close()
-
-@app.route('/account_creation', methods=['GET'])
-def account_creation_form():
-    return render_template('account_creation.html')
 
 @app.route('/create_account', methods=['POST'])
 def create_account():
@@ -145,9 +140,44 @@ def insert_post(user_id, title, description, task_outline, research_requirements
         cursor.close()
         conn.close()
 
+def get_user_details(user_id):
+    try:
+        conn, cursor = dbConn.get_connection()
+
+        cursor.execute("SELECT * FROM users WHERE userID = %s", (user_id,))
+        user = cursor.fetchone()
+
+        if user:
+            user_dict = {
+                'userID': user[0],
+                'email': user[1],
+                'password': user[2],
+                'firstName': user[3],
+                'lastName': user[4]
+            }
+            return user_dict
+        else:
+            return None
+
+    except Error as e:
+        print("Error fetching user details:", e)
+        return None
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 @app.route('/dashboard')
 def dashboard():
-    return render_template('CCCDashboard.html')
+    user_id = session.get('user_id')
+    if user_id:
+        user_details = get_user_details(user_id)
+        first_name = user_details.get('firstName')
+    else:
+        first_name = None
+    
+    return render_template('CCCDashboard.html', first_name=first_name)
 
 @app.route('/manage_posts')
 def manage_posts():
@@ -156,10 +186,6 @@ def manage_posts():
 @app.route('/sign_out')
 def sign_out():
     return redirect(url_for('login'))
-
-@app.route('/search_posts')
-def search_posts():
-    return render_template('CCCSearch.html')
 
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
@@ -198,8 +224,6 @@ def save_resume_to_database(user_id, post_id, file_content, content_type):
             cursor.close()
             conn.close()
 
-
-
 @app.route('/search')
 def search():
     search_term = request.args.get('search', '')
@@ -232,8 +256,6 @@ def search():
     ]
 
     return render_template('CCCSearch.html', job_posts=job_posts_dicts)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
