@@ -137,8 +137,7 @@
     <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
-        <div class="post-container" data-post-id="{{ post.id }}" data-tasks="{{ post.tasks }}"
-            data-requirements="{{ post.requirements }}">
+        <div class="post-container" data-post-id="{{ post.id }}" data-tasks="{{ post.tasks }}" data-requirements="{{ post.requirements }}">
             <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
                 {{ post.title }}
             </h4>
@@ -178,8 +177,8 @@
     <script>
         function openJobPostDetailsModal(element) {
             const postContainer = element.closest('.post-container');
-            // Capture the post ID from the data attribute
             const postId = postContainer.getAttribute('data-post-id');
+
 
             const title = element.innerText;
             const description = postContainer.querySelector('.post-description').textContent;
