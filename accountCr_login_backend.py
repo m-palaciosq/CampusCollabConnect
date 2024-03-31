@@ -201,7 +201,6 @@ def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
     try:
         conn, cursor = dbConn.get_connection()
         insert_query = """INSERT INTO resumes (userID, postID, resumeFile, fileType) VALUES (%s, %s, %s, %s)"""
-        # Make sure to pass file_type_enum which contains the mapped ENUM value
         cursor.execute(insert_query, (user_id, post_id, file_content, file_type_enum))
         conn.commit()
     except Error as e:
