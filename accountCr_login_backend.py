@@ -166,19 +166,20 @@ def submit_resume():
     if 'resumeFile' not in request.files:
         flash('No file part')
         return redirect(request.url)
+    
     file = request.files['resumeFile']
     if file.filename == '':
         flash('No selected file')
         return redirect(request.url)
     
-        # Step 1: Identify the MIME Type of the Uploaded File
+    # Correctly identify the MIME type of the uploaded file
     file_mimetype = file.mimetype
 
-    # Step 2 & 3: Map the MIME Type to ENUM values and Validate
+    # Map the MIME type to your ENUM values and validate
     mime_type_to_enum = {
         'application/pdf': 'pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
-        # Add more mappings if necessary
+        # Add more mappings as necessary
     }
 
     file_type_enum = mime_type_to_enum.get(file_mimetype, None)
@@ -187,35 +188,30 @@ def submit_resume():
         return redirect(request.url)
 
     user_id = session.get('user_id')
-    post_id = request.form.get('postID')
+    # Ensure this matches the field's name in your form. It seems there was a discrepancy in your original code.
+    post_id = request.form.get('postID')  
 
-    if file:
-        user_id = session.get('user_id')
-        post_id = request.form.get('post_id') 
+    # Proceed with saving the resume
+    # This time, use file_type_enum instead of content_type for the database insertion
+    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
 
-        # Read the file's content
-        file_content = file.read()
-        content_type = file.content_type
-
-        # Insert the file content and other metadata into the database
-        save_resume_to_database(user_id, post_id, file_content, content_type)
-
-        flash('Resume uploaded successfully')
-        return redirect(url_for('dashboard'))
+    flash('Resume uploaded successfully')
+    return redirect(url_for('dashboard'))
 
 def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
     try:
         conn, cursor = dbConn.get_connection()
         insert_query = """INSERT INTO resumes (userID, postID, resumeFile, fileType) VALUES (%s, %s, %s, %s)"""
+        # Make sure to pass file_type_enum which contains the mapped ENUM value
         cursor.execute(insert_query, (user_id, post_id, file_content, file_type_enum))
         conn.commit()
     except Error as e:
         print("An error occurred:", e)
-        # Handle the error appropriately
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
 
 
 @app.route('/search')
