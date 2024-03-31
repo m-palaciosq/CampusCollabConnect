@@ -192,35 +192,47 @@ def submit_resume():
     if 'resumeFile' not in request.files:
         flash('No file part')
         return redirect(request.url)
+    
     file = request.files['resumeFile']
     if file.filename == '':
         flash('No selected file')
         return redirect(request.url)
-    if file:
-        user_id = session.get('user_id')
-        post_id = request.form.get('post_id') 
+    
+    # Correctly identify the MIME type of the uploaded file
+    file_mimetype = file.mimetype
 
-        # Read the file's content
-        file_content = file.read()
-        content_type = file.content_type
+    # Map the MIME type to your ENUM values and validate
+    mime_type_to_enum = {
+        'application/pdf': 'pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        # Add more mappings as necessary
+    }
 
-        # Insert the file content and other metadata into the database
-        save_resume_to_database(user_id, post_id, file_content, content_type)
+    file_type_enum = mime_type_to_enum.get(file_mimetype, None)
+    if file_type_enum is None:
+        flash("Unsupported file type. Please upload a PDF or DOCX file.")
+        return redirect(request.url)
 
-        flash('Resume uploaded successfully')
-        return redirect(url_for('dashboard'))
+    user_id = session.get('user_id')
+    post_id = request.form.get('post_id')  
 
-def save_resume_to_database(user_id, post_id, file_content, content_type):
+    # Proceed with saving the resume
+    # This time, use file_type_enum instead of content_type for the database insertion
+    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
+
+    flash('Resume uploaded successfully')
+    return redirect(url_for('dashboard'))
+
+def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
     try:
         conn, cursor = dbConn.get_connection()
         insert_query = """INSERT INTO resumes (userID, postID, resumeFile, fileType) VALUES (%s, %s, %s, %s)"""
-        cursor.execute(insert_query, (user_id, post_id, file_content, content_type))
+        cursor.execute(insert_query, (user_id, post_id, file_content, file_type_enum))
         conn.commit()
     except Error as e:
         print("An error occurred:", e)
-        # Handle error
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
