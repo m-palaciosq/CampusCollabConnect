@@ -188,7 +188,7 @@ def submit_resume():
         return redirect(request.url)
 
     user_id = session.get('user_id')
-    post_id = int(request.form.get('post_id'))
+    post_id = request.form.get('post_id')  
 
     # Proceed with saving the resume
     # This time, use file_type_enum instead of content_type for the database insertion
