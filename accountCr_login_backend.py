@@ -172,7 +172,7 @@ def submit_resume():
         return redirect(request.url)
     if file:
         user_id = session.get('user_id')
-        post_id = request.form.get('post_id')  
+        post_id = request.form.get('postID')  # Make sure this is passed in your form
 
         # Read the file's content
         file_content = file.read()
