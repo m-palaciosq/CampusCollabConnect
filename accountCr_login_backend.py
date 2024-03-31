@@ -170,6 +170,16 @@ def submit_resume():
     if file.filename == '':
         flash('No selected file')
         return redirect(request.url)
+    
+        # Step 1: Identify the MIME Type of the Uploaded File
+    file_mimetype = file.mimetype
+
+    # Step 2 & 3: Map the MIME Type to ENUM values and Validate
+    mime_type_to_enum = {
+        'application/pdf': 'pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        # Add more mappings if necessary
+    }
     if file:
         user_id = session.get('user_id')
         post_id = request.form.get('post_id') 
