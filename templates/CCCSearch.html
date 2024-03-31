@@ -161,7 +161,7 @@
                 <p id="jobPostRequirements"></p>
             </div>
             <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
-                <input type="hidden" name="postID" id="jobPostIdForResume" value="">
+                <input type="hidden" name="postID" id="jobPostIdForResume" value="{{ postID }}"> 
                 <div class="form-group">
                     <label for="resumeFile">Attach your resume:</label>
                     <input type="file" id="resumeFile" name="resumeFile" required>
