@@ -180,6 +180,15 @@ def submit_resume():
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
         # Add more mappings if necessary
     }
+
+    file_type_enum = mime_type_to_enum.get(file_mimetype, None)
+    if file_type_enum is None:
+        flash("Unsupported file type. Please upload a PDF or DOCX file.")
+        return redirect(request.url)
+
+    user_id = session.get('user_id')
+    post_id = request.form.get('postID')
+
     if file:
         user_id = session.get('user_id')
         post_id = request.form.get('post_id') 
@@ -194,20 +203,19 @@ def submit_resume():
         flash('Resume uploaded successfully')
         return redirect(url_for('dashboard'))
 
-def save_resume_to_database(user_id, post_id, file_content, content_type):
+def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
     try:
         conn, cursor = dbConn.get_connection()
         insert_query = """INSERT INTO resumes (userID, postID, resumeFile, fileType) VALUES (%s, %s, %s, %s)"""
-        cursor.execute(insert_query, (user_id, post_id, file_content, content_type))
+        cursor.execute(insert_query, (user_id, post_id, file_content, file_type_enum))
         conn.commit()
     except Error as e:
         print("An error occurred:", e)
-        # Handle error
+        # Handle the error appropriately
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
 
 
 @app.route('/search')
