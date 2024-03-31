@@ -164,15 +164,40 @@ def search_posts():
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
     if 'resumeFile' not in request.files:
-        flash('No file part', 'error')
+        flash('No file part')
         return redirect(request.url)
     file = request.files['resumeFile']
     if file.filename == '':
-        flash('No selected file', 'error')
+        flash('No selected file')
         return redirect(request.url)
     if file:
-        flash('File uploaded successfully', 'success')
-        return redirect(request.url) 
+        user_id = session.get('user_id')
+        post_id = request.form.get('post_id')  # Make sure this is passed in your form
+
+        # Read the file's content
+        file_content = file.read()
+        content_type = file.content_type
+
+        # Insert the file content and other metadata into the database
+        save_resume_to_database(user_id, post_id, file_content, content_type)
+
+        flash('Resume uploaded successfully')
+        return redirect(url_for('dashboard'))
+
+def save_resume_to_database(user_id, post_id, file_content, content_type):
+    try:
+        conn, cursor = dbConn.get_connection()
+        insert_query = """INSERT INTO resumes (userID, postID, resumeFile, fileType) VALUES (%s, %s, %s, %s)"""
+        cursor.execute(insert_query, (user_id, post_id, file_content, content_type))
+        conn.commit()
+    except Error as e:
+        print("An error occurred:", e)
+        # Handle error
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 
 
 @app.route('/search')
