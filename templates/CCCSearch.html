@@ -137,14 +137,17 @@
     <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
-        <div class="post-container" data-post-id="{{ post.id }}" data-tasks="{{ post.tasks }}" data-requirements="{{ post.requirements }}">
-            <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
-                {{ post.title }}
-            </h4>
-            <p class="post-description">{{ post.description }}</p>
-            <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
-            <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
-        </div>
+            <div class="post-container" 
+                 data-post-id="{{ post.id }}" 
+                 data-tasks="{{ post.tasks }}" 
+                 data-requirements="{{ post.requirements }}">
+                <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
+                    {{ post.title }}
+                </h4>
+                <p class="post-description">{{ post.description }}</p>
+                <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
+                <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
+            </div>
         {% endfor %}
     </div>
 
@@ -177,7 +180,7 @@
     <script>
         function openJobPostDetailsModal(element) {
             const postContainer = element.closest('.post-container');
-            const postId = postContainer.getAttribute('post_id');
+            const postId = postContainer.getAttribute('data-post-id'); 
             console.log("Fetched postID:", postId); // Debugging line
 
 
