@@ -144,7 +144,6 @@
             <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
                 {{ post.title }}
             </h4>
-            <p class="post-postID">{{post.postID}}</p>
             <p class="post-description">{{ post.description }}</p>
             <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
             <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
@@ -182,8 +181,6 @@
         function openJobPostDetailsModal(element) {
             const postContainer = element.closest('.post-container');
             const postId = postContainer.getAttribute('data-post-id'); 
-            console.log("Fetched postID:", postId); // Debugging line
-
 
             const title = element.innerText;
             const description = postContainer.querySelector('.post-description').textContent;
@@ -198,8 +195,6 @@
 
             // Now, set the post_id value in the hidden input within the modal form
             document.getElementById('jobPostIdForResume').value = postId;
-
-            console.log("Set postID in hidden input:", document.getElementById('jobPostIdForResume').value); // Debugging line
 
             // Show the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
