@@ -214,7 +214,7 @@ def submit_resume():
         return redirect(request.url)
 
     user_id = session.get('user_id')
-    post_id = request.form.get('post_id')  
+    post_id = request.form.get('postID')  
 
     # Proceed with saving the resume
     # This time, use file_type_enum instead of content_type for the database insertion
@@ -235,6 +235,8 @@ def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
+
 
 @app.route('/search')
 def search():
