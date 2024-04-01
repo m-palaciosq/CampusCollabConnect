@@ -176,18 +176,30 @@
 
     <script>
         function openJobPostDetailsModal(element) {
-    const postContainer = element.closest('.post-container');
-    const postId = postContainer.getAttribute('data-post-id');
+            const postContainer = element.closest('.post-container');
+            const postId = postContainer.getAttribute('data-post-id');
+            console.log("Fetched postID:", postId); // Debugging line
 
-    console.log("Fetched postID:", postId); // Debugging line
 
-    // Existing code to set the modal content...
-    document.getElementById('jobPostIdForResume').value = postId;
+            const title = element.innerText;
+            const description = postContainer.querySelector('.post-description').textContent;
+            const tasks = postContainer.dataset.tasks;
+            const requirements = postContainer.dataset.requirements;
 
-    console.log("Set postID in hidden input:", document.getElementById('jobPostIdForResume').value); // Debugging line
+            // Update the modal content as before
+            document.getElementById('jobPostTitle').innerText = title;
+            document.getElementById('jobPostDescription').innerText = description;
+            document.getElementById('jobPostTasks').innerText = tasks;
+            document.getElementById('jobPostRequirements').innerText = requirements;
 
-    document.getElementById('jobPostDetailsModal').style.display = "block";
-}
+            // Now, set the post_id value in the hidden input within the modal form
+            document.getElementById('jobPostIdForResume').value = postId;
+            console.log("Set postID in hidden input:", document.getElementById('jobPostIdForResume').value); // Debugging line
+
+            // Show the modal
+            document.getElementById('jobPostDetailsModal').style.display = "block";
+        }
+
 
         // Add event listener to search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
