@@ -161,6 +161,8 @@ def sign_out():
 def search_posts():
     return render_template('CCCSearch.html')
 
+
+
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
     if 'resumeFile' not in request.files:
