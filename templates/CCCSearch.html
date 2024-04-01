@@ -177,7 +177,7 @@
     <script>
         function openJobPostDetailsModal(element) {
             const postContainer = element.closest('.post-container');
-            const postId = postContainer.getAttribute('post_id');
+            const postId = postContainer.getAttribute('postId');
             console.log("Fetched postID:", postId); // Debugging line
 
 
@@ -194,6 +194,7 @@
 
             // Now, set the post_id value in the hidden input within the modal form
             document.getElementById('jobPostIdForResume').value = postId;
+
             console.log("Set postID in hidden input:", document.getElementById('jobPostIdForResume').value); // Debugging line
 
             // Show the modal
