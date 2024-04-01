@@ -7,11 +7,10 @@
     <title>Search Job Posts</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f2f2f2;
         }
-        
+
         .search-container,
         .navigation-container,
         .filter-form {
@@ -19,7 +18,7 @@
             display: flex;
             align-items: center;
         }
-        
+
         .search-input {
             width: 70%;
             padding: 10px;
@@ -27,7 +26,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        
+
         .search-button,
         .filter-button,
         .back-button {
@@ -41,22 +40,22 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .search-button,
         .filter-button {
             background-color: #007bff;
         }
-        
+
         .back-button {
             background-color: #007bff;
         }
-        
+
         .search-button:hover,
         .filter-button:hover,
         .back-button:hover {
             opacity: 0.9;
         }
-        
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -67,9 +66,10 @@
             width: 100%;
             height: 100%;
             overflow: auto;
+            background-color: rgb(0, 0, 0);
             background-color: rgba(0, 0, 0, 0.4);
         }
-        
+
         .modal-content {
             background-color: #fefefe;
             margin: 10% auto;
@@ -77,47 +77,49 @@
             border: 1px solid #888;
             width: 80%;
         }
-        
+
         .close {
             color: #aaaaaa;
             float: right;
             font-size: 28px;
             font-weight: bold;
         }
-        
+
         .close:hover,
         .close:focus {
             color: #000;
             text-decoration: none;
             cursor: pointer;
         }
-        
+
+        /* Checkbox styles */
+        .filter-checkboxes {
+            margin: 10px 0;
+        }
+
         .post-container {
             border: 1px solid #ccc;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
-            background-color: #ffffff;
+            background-color: #f9f9f9;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .post-title {
             cursor: pointer;
-            color: #007bff;
-            font-size: 20px;
-            margin-bottom: 10px;
+            color: #333;
         }
-        
+
         .post-title:hover {
-            color: #0056b3;
+            color: blue;
         }
-        
+
         .post-description,
         .post-details {
             color: #333;
             margin-bottom: 10px;
         }
-
     </style>
 </head>
 
@@ -135,7 +137,10 @@
     <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
-        <div class="post-container" data-post-id="{{ post.id }}" data-tasks="{{ post.tasks }}" data-requirements="{{ post.requirements }}">
+        <div class="post-container" 
+        data-post-id="{{post.postID}}" 
+        data-tasks="{{ post.tasks }}" 
+        data-requirements="{{ post.requirements }}">
             <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
                 {{ post.title }}
             </h4>
@@ -160,7 +165,7 @@
             </div>
 
             <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
-                <input type="hidden" name="post_id" id="jobPostIdForResume" value="">
+                <input type="hidden" name="postID" id="jobPostIdForResume" value="">
                 <div class="form-group">
                     <label for="resumeFile">Attach your resume:</label>
                     <input type="file" id="resumeFile" name="resumeFile" required>
@@ -175,8 +180,7 @@
     <script>
         function openJobPostDetailsModal(element) {
             const postContainer = element.closest('.post-container');
-            const postId = postContainer.getAttribute('data-post-id');
-
+            const postId = postContainer.getAttribute('data-post-id'); 
 
             const title = element.innerText;
             const description = postContainer.querySelector('.post-description').textContent;
