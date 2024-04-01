@@ -138,7 +138,7 @@
     <div id="search-results">
         {% for post in job_posts %}
         <div class="post-container" 
-        data-post-id="{{ post.postID}}" 
+        data-post-id="{{post.postID}}" 
         data-tasks="{{ post.tasks }}" 
         data-requirements="{{ post.requirements }}">
             <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
@@ -166,7 +166,7 @@
             </div>
 
             <form id="resumeSubmissionForm" enctype="multipart/form-data" action="/submit_resume" method="post">
-                <input type="hidden" name="post_id" id="jobPostIdForResume" value="">
+                <input type="hidden" name="postID" id="jobPostIdForResume" value="">
                 <div class="form-group">
                     <label for="resumeFile">Attach your resume:</label>
                     <input type="file" id="resumeFile" name="resumeFile" required>
