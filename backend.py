@@ -297,6 +297,26 @@ def view_resumes(post_id):
 
     return render_template('review_resumes.html', resumes=resumes, job_post_title=job_post_title)
 
+# Define a function to fetch and display submitted resumes for a specific job post
+@app.route('/posts/<int:post_id>/resumes')
+def view_resumes(post_id):
+    if 'user_id' not in session:
+        flash('Please log in to view resumes.', 'error')
+        return redirect(url_for('login'))
+    
+    conn = dbConn.get_connection()
+    user_id = session['user_id']
+
+    # Check if the logged-in user is the author of the post
+    if not user_is_author_of_post(conn, user_id, post_id):
+        flash('You do not have permission to view these resumes.', 'error')
+        return redirect(url_for('dashboard'))
+
+    resumes = fetch_resumes_for_post(conn, post_id)
+    job_post_title = get_job_post_title(conn, post_id)
+
+    return render_template('review_resumes.html', resumes=resumes, job_post_title=job_post_title)
+
 # Helper function to fetch resumes for a given post
 def fetch_resumes_for_post(conn, post_id):
     try:
@@ -332,7 +352,6 @@ def user_is_author_of_post(conn, user_id, post_id):
     result = cursor.fetchone()
     cursor.close()
     return result and result[0] == user_id
-
 
 
 @app.route('/sign_out')
