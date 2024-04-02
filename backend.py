@@ -308,42 +308,34 @@ def user_is_author_of_post(user_id, post_id):
     return False  # Default to False if not found or error occurs
 
 def view_resumes(post_id):
-    if 'user_id' not in session:
-        flash('Please log in to view resumes.', 'error')
-        return redirect(url_for('login'))
-    
-    user_id = session['user_id']
-    if not user_is_author_of_post(user_id, post_id):
-        flash('You do not have permission to view these resumes.', 'error')
-        return redirect(url_for('dashboard'))
-
+    # Assuming you have already established a db connection and verified user permissions
     try:
-        conn, cursor = dbConn.get_connection()
+        conn = dbConn.get_connection()
+        cursor = conn.cursor()
         cursor.execute("""
-            SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName, u.email
-            FROM resumes r
-            JOIN users u ON r.userID = u.userID
-            WHERE r.postID = %s
+            SELECT resumeID, userID, fileType, firstName, lastName, email, submissionDate
+            FROM resumes
+            JOIN users ON resumes.userID = users.userID
+            WHERE postID = %s
         """, (post_id,))
+        
         resumes = [{
             'id': row[0],
             'applicant_name': f"{row[3]} {row[4]}",
             'applicant_email': row[5],
+            'submission_date': row[6],  # Ensure you're fetching this if available
             'file_type': row[2]
         } for row in cursor.fetchall()]
+        
+        cursor.close()
     except Error as e:
-        flash('Error fetching resumes.', 'error')
-        print(f"Database error: {e}")
-        resumes = []
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-
-    # Fetch the title of the job post for display
-    job_post_title = get_job_post_title(post_id)  # Implement this function to fetch the job post's title
+        print(f"Error fetching resumes: {e}")
+        resumes = []  # Ensure resumes list is defined even if an error occurs
+        
+    # Assuming get_job_post_title function fetches the title based on post_id
+    job_post_title = get_job_post_title(post_id)
+    
     return render_template('review_resumes.html', resumes=resumes, job_post_title=job_post_title)
-
 
 
 @app.route('/sign_out')
