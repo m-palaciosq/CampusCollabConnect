@@ -145,6 +145,54 @@ def insert_post(user_id, title, description, task_outline, research_requirements
         cursor.close()
         conn.close()
 
+@app.route('/posts/<int:post_id>/resumes', methods=['GET'])
+def view_resumes_for_post(post_id):
+    # Check if the user is logged in
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Please log in to continue.', 'error')
+        return redirect(url_for('login'))
+
+    # Verify that the current user is the author of the post
+    if not is_author_of_post(user_id, post_id):
+        flash('You are not authorized to view this page.', 'error')
+        return redirect(url_for('dashboard'))
+
+    # Fetch the resumes submitted to this post
+    resumes = fetch_resumes(post_id)
+
+    # Render a template to display the resumes
+    return render_template('view_resumes.html', resumes=resumes, post_id=post_id)
+
+def is_author_of_post(user_id, post_id):
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
+        post_user_id = cursor.fetchone()
+        return post_user_id and post_user_id[0] == user_id
+    except Error as e:
+        print("Database error:", e)
+        return False
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+def fetch_resumes(post_id):
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT * FROM resumes WHERE postID = %s", (post_id,))
+        resumes = cursor.fetchall()
+        return resumes
+    except Error as e:
+        print("Database error:", e)
+        return []
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
 @app.route('/dashboard')
 def dashboard():
     return render_template('CCCDashboard.html')
