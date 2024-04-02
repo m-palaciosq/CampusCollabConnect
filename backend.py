@@ -178,6 +178,7 @@ def dashboard():
         first_name = None
     
     return render_template('CCCDashboard.html', first_name=first_name)
+
 @app.route('/manage_posts')
 def manage_posts():
     posts_list = []  # Initialize an empty list to hold the post dictionaries
@@ -272,6 +273,8 @@ def edit_post(post_id):
                 conn.close()
 
         return redirect(url_for('manage_posts'))
+    
+    
 
 
 
