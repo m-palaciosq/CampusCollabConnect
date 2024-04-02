@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Submitted Resumes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            padding: 15px;
+            background-color: white;
+            border-radius: 0.25rem;
+        }
+        .resume-item {
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .download-button, .contact-button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mb-4">Resumes Submitted for: {{ job_post_title }}</h2>
+        {% if resumes %}
+            {% for resume in resumes %}
+                <div class="resume-item">
+                    <h5>{{ resume.applicant_name }}</h5>
+                    <p>Email: {{ resume.applicant_email }}</p>
+                    <p>Submitted on: {{ resume.submission_date }}</p>
+                    <p><a href="{{ url_for('download_resume', resume_id=resume.id) }}" class="btn btn-primary download-button">Download Resume</a></p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No resumes submitted for this job post yet.</p>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
