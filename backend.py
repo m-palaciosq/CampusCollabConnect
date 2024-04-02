@@ -276,7 +276,7 @@ def edit_post(post_id):
     
     
     
-@app.route('/posts/<int:post_id>/resumes')
+@app.route('/posts/<int:post_id>/resumes', endpoint = 'view_resumes')
 def get_job_post_title(post_id):
     try:
         conn, cursor = dbConn.get_connection()
