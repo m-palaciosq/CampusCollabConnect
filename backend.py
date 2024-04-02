@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
 from mysql.connector import Error
 import dbConn
 import key
@@ -344,38 +345,64 @@ def sign_out():
 
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash('Please log in to submit a resume.', 'error')
+        return redirect(url_for('login'))
+
+    # Check if the post request has the file part
     if 'resumeFile' not in request.files:
-        flash('No file part')
+        flash('No file part', 'error')
         return redirect(request.url)
     
     file = request.files['resumeFile']
+    # If the user does not select a file, the browser submits an
+    # empty file without a filename.
     if file.filename == '':
-        flash('No selected file')
+        flash('No selected file', 'error')
         return redirect(request.url)
     
-    # Correctly identify the MIME type of the uploaded file
+    # MIME type check
     file_mimetype = file.mimetype
-
-    # Map the MIME type to your ENUM values and validate
     mime_type_to_enum = {
         'application/pdf': 'pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
-        # Add more mappings as necessary
     }
+    file_type_enum = mime_type_to_enum.get(file_mimetype)
 
-    file_type_enum = mime_type_to_enum.get(file_mimetype, None)
     if file_type_enum is None:
-        flash("Unsupported file type. Please upload a PDF or DOCX file.")
+        flash("Unsupported file type. Please upload a PDF or DOCX file.", 'error')
         return redirect(request.url)
-
-    user_id = session.get('user_id')
-    post_id = request.form.get('postID')  
+    
+    # File size check
+    file.seek(0, os.SEEK_END)
+    file_length = file.tell()
+    if file_length > 5 * 1024 * 1024:  # 5MB
+        flash('File too large. Please upload files up to 5MB.', 'error')
+        return redirect(request.url)
+    file.seek(0)  # Reset file pointer for reading
 
     # Proceed with saving the resume
-    # This time, use file_type_enum instead of content_type for the database insertion
-    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
+    user_id = session['user_id']
+    post_id = request.form.get('postID')
 
-    flash('Resume uploaded successfully')
+    try:
+        conn, cursor = dbConn.get_connection()
+        insert_query = """
+        INSERT INTO resumes (userID, postID, resumeFile, fileType)
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (user_id, post_id, file.read(), file_type_enum))
+        conn.commit()
+        flash('Resume uploaded successfully', 'success')
+    except Error as e:
+        print("An error occurred:", e)
+        flash("An error occurred while uploading your resume.", 'error')
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+    
     return redirect(url_for('dashboard'))
 
 def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
