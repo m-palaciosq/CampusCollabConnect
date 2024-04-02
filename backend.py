@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, abort
-import io
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from mysql.connector import Error
 import dbConn
 import key
@@ -24,7 +23,6 @@ def login():
 
     return render_template('login.html')
 
-# part of login
 def authenticate_user(email, password):
     try:
         conn, cursor = dbConn.get_connection()
@@ -76,10 +74,6 @@ def create_user(email, password, first_name, last_name):
         if conn.is_connected():
             cursor.close()
             conn.close()
-
-@app.route('/account_creation', methods=['GET'])
-def account_creation_form():
-    return render_template('account_creation.html')
 
 @app.route('/create_account', methods=['POST'])
 def create_account():
@@ -146,67 +140,144 @@ def insert_post(user_id, title, description, task_outline, research_requirements
         cursor.close()
         conn.close()
 
-@app.route('/resumes/download/<int:resume_id>')
-def download_resume(resume_id):
-    user_id = session.get('user_id')
-    if not user_id:
-        flash("Please log in to download resumes.", "error")
-        return redirect(url_for('login'))
-
-    # Optional: Check if the user is authorized to download the resume
-    # This might involve checking if the user is the author of the job post
-    # the resume was submitted to, among other checks.
-
-    resume_data, file_name, file_type = get_resume_data(resume_id)
-    if resume_data:
-        return send_resume_file(resume_data, file_name, file_type)
-    else:
-        abort(404, description="Resume not found")
-
-def get_resume_data(resume_id):
+def get_user_details(user_id):
     try:
         conn, cursor = dbConn.get_connection()
-        cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resume_id,))
-        resume = cursor.fetchone()
-        if resume:
-            # Assuming the fileType is stored as 'pdf' or 'docx' etc.
-            file_type = 'application/pdf' if resume[1] == 'pdf' else 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            file_name = f"resume_{resume_id}.{resume[1]}"  # Construct a file name
-            return (io.BytesIO(resume[0]), file_name, file_type)  # resume[0] is the BLOB data
+
+        cursor.execute("SELECT * FROM users WHERE userID = %s", (user_id,))
+        user = cursor.fetchone()
+
+        if user:
+            user_dict = {
+                'userID': user[0],
+                'email': user[1],
+                'password': user[2],
+                'firstName': user[3],
+                'lastName': user[4]
+            }
+            return user_dict
+        else:
+            return None
+
     except Error as e:
-        print(f"Error downloading resume: {e}")
+        print("Error fetching user details:", e)
+        return None
+
     finally:
         if conn.is_connected():
             cursor.close()
             conn.close()
-    return None, None, None
-
-def send_resume_file(resume_data, file_name, file_type):
-    return send_file(
-        resume_data,
-        as_attachment=True,
-        download_name=file_name,
-        mimetype=file_type
-    )
-
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('CCCDashboard.html')
-
+    user_id = session.get('user_id')
+    if user_id:
+        user_details = get_user_details(user_id)
+        first_name = user_details.get('firstName')
+    else:
+        first_name = None
+    
+    return render_template('CCCDashboard.html', first_name=first_name)
 @app.route('/manage_posts')
 def manage_posts():
-    return render_template('mPostSelection.html')
+    posts_list = []  # Initialize an empty list to hold the post dictionaries
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("""
+            SELECT p.postID, u.firstName, u.lastName, p.title, p.description
+            FROM posts p
+            JOIN users u ON p.userID = u.userID
+        """)
+        posts = cursor.fetchall()
+        # Convert each tuple to a dictionary
+        for post in posts:
+            post_dict = {
+                'postID': post[0],
+                'username': f"{post[1]} {post[2]}",  # Combine first name and last name
+                'title': post[3],
+                'description': post[4]
+            }
+            posts_list.append(post_dict)
+    except Exception as e:
+        print(f"An error occurred while fetching posts: {e}")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return render_template('mPostSelection.html', posts=posts_list)
+
+@app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
+def edit_post(post_id):
+    if request.method == 'POST':
+        # Retrieve updated details from the form submission
+        title = request.form['title']
+        description = request.form['description']
+        task_outline = request.form['task_outline']
+        research_requirements = request.form['research_requirements']
+
+        try:
+            conn, cursor = dbConn.get_connection()
+            # Update post
+            cursor.execute("""
+                UPDATE posts SET title = %s, description = %s WHERE postID = %s
+            """, (title, description, post_id))
+            
+            # First, delete existing entries
+            cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
+            cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
+            
+            # Insert new tasks and research requirements
+            for task in task_outline.split(';'):
+                cursor.execute("INSERT INTO tasks (postID, taskDescription) VALUES (%s, %s)", (post_id, task.strip()))
+            for requirement in research_requirements.split(';'):
+                cursor.execute("INSERT INTO researchReqs (postID, requirementDesc) VALUES (%s, %s)", (post_id, requirement.strip()))
+            
+            conn.commit()
+            flash('Post updated successfully.')
+            return redirect(url_for('manage_posts'))
+        except Exception as e:
+            conn.rollback()  # Roll back in case of error
+            flash('An error occurred while updating the post.')
+            print(f"An error occurred: {e}")
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+    else:
+        # Handle GET request by fetching post details to pre-fill the form
+        try:
+            conn, cursor = dbConn.get_connection()
+            cursor.execute("SELECT title, description FROM posts WHERE postID = %s", (post_id,))
+            post = cursor.fetchone()
+            if post:
+                # Fetch tasks and research requirements
+                cursor.execute("SELECT taskDescription FROM tasks WHERE postID = %s", (post_id,))
+                tasks = '; '.join([task[0] for task in cursor.fetchall()])
+                cursor.execute("SELECT requirementDesc FROM researchReqs WHERE postID = %s", (post_id,))
+                requirements = '; '.join([req[0] for req in cursor.fetchall()])
+                post_details = {
+                    'title': post[0],
+                    'description': post[1],
+                    'tasks': tasks,
+                    'requirements': requirements
+                }
+                return render_template('edit_post.html', post=post_details, post_id=post_id)
+        except Exception as e:
+            flash('An error occurred while fetching the post details.')
+            print(f"An error occurred: {e}")
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+
+        return redirect(url_for('manage_posts'))
+
+
 
 @app.route('/sign_out')
 def sign_out():
     return redirect(url_for('login'))
-
-@app.route('/search_posts')
-def search_posts():
-    return render_template('CCCSearch.html')
-
-
 
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
@@ -291,8 +362,6 @@ def search():
     ]
 
     return render_template('CCCSearch.html', job_posts=job_posts_dicts)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
