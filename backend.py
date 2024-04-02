@@ -277,66 +277,62 @@ def edit_post(post_id):
     
     
     
-@app.route('/posts/<int:post_id>/resumes', endpoint = 'view_resumes')
-def get_job_post_title(post_id):
-    try:
-        conn, cursor = dbConn.get_connection()
-        cursor.execute("SELECT title FROM posts WHERE postID = %s", (post_id,))
-        title_row = cursor.fetchone()
-        if title_row:
-            return title_row[0]  # Return the title of the post
-    except Error as e:
-        print(f"Error fetching job post title: {e}")
-    finally:
-        if conn and cursor and conn.is_connected():
-            cursor.close()
-            conn.close()
-    return ""  # Return an empty string if post not found or error occurs
-
-def user_is_author_of_post(user_id, post_id):
-    try:
-        conn, cursor = dbConn.get_connection()
-        cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
-        post_user_id_row = cursor.fetchone()
-        if post_user_id_row and post_user_id_row[0] == user_id:
-            return True  # The logged-in user is the author of the post
-    except Error as e:
-        print(f"Error verifying post author: {e}")
-    finally:
-        if conn and cursor and conn.is_connected():
-            cursor.close()
-            conn.close()
-    return False  # Default to False if not found or error occurs
-
+# Define a function to fetch and display submitted resumes for a specific job post
+@app.route('/posts/<int:post_id>/resumes')
 def view_resumes(post_id):
-    # Assuming you have already established a db connection and verified user permissions
+    if 'user_id' not in session:
+        flash('Please log in to view resumes.', 'error')
+        return redirect(url_for('login'))
+    
+    conn = dbConn.get_connection()
+    user_id = session['user_id']
+
+    # Check if the logged-in user is the author of the post
+    if not user_is_author_of_post(conn, user_id, post_id):
+        flash('You do not have permission to view these resumes.', 'error')
+        return redirect(url_for('dashboard'))
+
+    resumes = fetch_resumes_for_post(conn, post_id)
+    job_post_title = get_job_post_title(conn, post_id)
+
+    return render_template('review_resumes.html', resumes=resumes, job_post_title=job_post_title)
+
+# Helper function to fetch resumes for a given post
+def fetch_resumes_for_post(conn, post_id):
     try:
-        conn = dbConn.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT resumeID, userID, fileType, firstName, lastName, email, submissionDate
-            FROM resumes
-            JOIN users ON resumes.userID = users.userID
-            WHERE postID = %s
+            SELECT r.resumeID, u.firstName, u.lastName, r.fileType, r.resumeFile
+            FROM resumes r
+            JOIN users u ON r.userID = u.userID
+            WHERE r.postID = %s
         """, (post_id,))
-        
         resumes = [{
             'id': row[0],
-            'applicant_name': f"{row[3]} {row[4]}",
-            'applicant_email': row[5],
-            'submission_date': row[6],  # Ensure you're fetching this if available
-            'file_type': row[2]
+            'applicant_name': f"{row[1]} {row[2]}",
+            'file_type': row[3]
+            # You might include a mechanism to handle the actual file here
         } for row in cursor.fetchall()]
-        
+        return resumes
+    finally:
         cursor.close()
-    except Error as e:
-        print(f"Error fetching resumes: {e}")
-        resumes = []  # Ensure resumes list is defined even if an error occurs
-        
-    # Assuming get_job_post_title function fetches the title based on post_id
-    job_post_title = get_job_post_title(post_id)
-    
-    return render_template('review_resumes.html', resumes=resumes, job_post_title=job_post_title)
+
+# Function to fetch the job post title
+def get_job_post_title(conn, post_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT title FROM posts WHERE postID = %s", (post_id,))
+    title = cursor.fetchone()
+    cursor.close()
+    return title[0] if title else "Unknown"
+
+# Function to check if a user is the author of a post
+def user_is_author_of_post(conn, user_id, post_id):
+    cursor = conn.cursor()
+    cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    return result and result[0] == user_id
+
 
 
 @app.route('/sign_out')
