@@ -7,53 +7,49 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #f8f9fa; /* Soft background color for better contrast */
+            background-color: #f8f9fa;
         }
         .post {
-            border: 1px solid #dee2e6; /* Bootstrap's light grey */
-            background-color: #ffffff; /* White background for posts */
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
             padding: 20px;
             margin-bottom: 20px;
-            border-radius: 5px; /* Slightly rounded corners for a modern look */
-            box-shadow: 0 2px 4px rgba(0,0,0,.1); /* Subtle shadow for depth */
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
         }
         .post h2 {
-            color: #007bff; /* Bootstrap primary blue for post titles */
+            color: #007bff;
         }
         .post p {
-            font-size: 16px; /* Slightly larger font for readability */
+            font-size: 16px;
         }
-        .edit-button, #back-button {
-            margin-top: 20px; /* Increased space above buttons */
+        .edit-button, .view-resumes-button, #back-button {
+            margin-top: 20px;
         }
         #back-button {
-            width: auto; /* Auto width based on content */
-            padding: 10px 15px; /* Slightly smaller padding */
+            width: auto;
+            padding: 10px 15px;
         }
         .header-area {
-            margin-bottom: 40px; /* More space above the title */
+            margin-bottom: 40px;
         }
     </style>
 </head>
 <body class="container">
     <div class="header-area text-center">
-        <div class="text-center">
-            <!-- Back button centered at the bottom of the posts list -->
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" id="back-button">Back to Dashboard</a>
-        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" id="back-button">Back to Dashboard</a>
         <h1 class="mt-5">Please Select a Post</h1>
-        <!-- Optional: Add a brief description or instructions -->
-        <p class="lead">Here you can view and edit your posts.</p>
-        
+        <p class="lead">Here you can view, edit your posts, and review submitted resumes.</p>
     </div>
     <div id="posts-container">
-        <!-- Dynamically insert posts using Jinja2 templating -->
         {% for post in posts %}
         <div class="post">
             <h2>{{ post['title'] }}</h2>
             <p>{{ post['description'] }}</p>
             <p>Posted by: {{ post['username'] }}</p>
             <a href="{{ url_for('edit_post', post_id=post['postID']) }}" class="btn btn-primary edit-button">Edit</a>
+            <!-- View Resumes button -->
+            <a href="{{ url_for('view_resumes', post_id=post['postID']) }}" class="btn btn-info view-resumes-button">View Resumes</a>
         </div>
         {% endfor %}
     </div>
