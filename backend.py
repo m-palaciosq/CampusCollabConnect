@@ -329,7 +329,6 @@ def view_resumes(post_id):
             'id': row[0],
             'applicant_name': f"{row[3]} {row[4]}",
             'applicant_email': row[5],
-            'submission_date': 'Not Provided',  # Add this field in your database or manage accordingly
             'file_type': row[2]
         } for row in cursor.fetchall()]
     except Error as e:
