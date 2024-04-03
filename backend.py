@@ -276,13 +276,13 @@ def download_resume(resumeID):
         resume = cursor.fetchone()
         if resume:
             resume_file, file_type = resume
-            # Generate a file name for the download, you might want to include more specific naming logic
-            file_name = f"resume{resumeID}.{file_type}"
+            # Create a generic file name based on resumeID and fileType
+            file_name = f"resume_{resumeID}.{file_type}"
             return send_file(
                 io.BytesIO(resume_file),
+                mimetype='application/octet-stream',  # Consider adjusting based on fileType
                 as_attachment=True,
-                attachment_filename=file_name,
-                mimetype='application/octet-stream'  # Or determine the MIME type based on fileType
+                download_name=file_name  # Uses the generic file name
             )
         else:
             flash("Resume not found.", "error")
