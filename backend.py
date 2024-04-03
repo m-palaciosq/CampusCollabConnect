@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, abort
 from mysql.connector import Error
 import dbConn
 import key
@@ -269,6 +269,33 @@ def view_resumes(post_id):
 
     # Render the view_resumes.html template, passing the fetched resumes
     return render_template('view_resumes.html', resumes=resumes, post_id=post_id)
+
+@app.route('/download_resume/<int:resume_id>')
+def download_resume(resume_id):
+    # Ensure the user is logged in
+    if 'user_id' not in session:
+        flash("Please log in to download resumes.", "info")
+        return redirect(url_for('login'))
+
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT file_path, file_name FROM resumes WHERE id = %s", (resume_id,))
+        resume = cursor.fetchone()
+
+        if resume:
+            file_path = resume[0]  # The path where the resume file is stored
+            file_name = resume[1]  # The original file name to be used when downloading
+            return send_file(file_path, as_attachment=True, attachment_filename=file_name)
+        else:
+            flash("Resume not found.", "error")
+            return redirect(url_for('view_resumes'))
+
+    except Exception as e:
+        print(f"An error occurred while downloading the resume: {e}")
+        abort(500)  # Return a server error
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
