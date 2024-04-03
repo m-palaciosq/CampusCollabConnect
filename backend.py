@@ -266,22 +266,31 @@ def view_resumes(postID):
 
 @app.route('/download_resume/<int:resumeID>')
 def download_resume(resumeID):
-    # Authentication check here
+    if 'user_id' not in session:
+        flash('Please log in to download resumes.', 'info')
+        return redirect(url_for('login'))
+    
     try:
         conn, cursor = dbConn.get_connection()
         cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
         resume = cursor.fetchone()
         if resume:
-            resume_data, file_type = resume
+            resume_file, file_type = resume
+            # Generate a file name for the download, you might want to include more specific naming logic
+            file_name = f"resume_{resumeID}.{file_type}"
             return send_file(
-                io.BytesIO(resume_data),
-                attachment_filename=f"resume_{resumeID}.{file_type}",
-                as_attachment=True
+                io.BytesIO(resume_file),
+                as_attachment=True,
+                attachment_filename=file_name,
+                mimetype='application/octet-stream'  # Or determine the MIME type based on fileType
             )
+        else:
+            flash("Resume not found.", "error")
+            return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
     except Exception as e:
         flash("An error occurred while downloading the resume.", "error")
-        print(f"An error occurred: {e}")
-        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Example redirect, adjust as needed
+        print(f"An error occurred: {e}")  # For debugging
+        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
     finally:
         if conn and conn.is_connected():
             cursor.close()
