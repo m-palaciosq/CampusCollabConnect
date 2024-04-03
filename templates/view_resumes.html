@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Resumes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .resume {
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .resume h2, .resume p {
+            margin: 0 0 10px 0;
+        }
+        .resume h2 {
+            color: #007bff;
+        }
+        .download-button, #back-button {
+            margin-top: 20px;
+        }
+        #back-button {
+            width: auto;
+            padding: 10px 15px;
+        }
+    </style>
+</head>
+<body class="container">
+    <div class="text-center">
+        <a href="{{ url_for('manage_posts') }}" class="btn btn-secondary" id="back-button">Back to Posts</a>
+        <h1 class="mt-5">Submitted Resumes for Post ID: {{ postID }}</h1>
+        <p class="lead">Review and download submitted resumes.</p>
+ </div>
+    <div id="resumes-container">
+        {% if resumes %}
+            {% for resume in resumes %}
+            <div class="resume">
+                <h2>User Name: {{ resume['firstName'] }} {{ resume['lastName'] }}</h2>
+                <p><strong>Resume ID:</strong> {{ resume['resumeID'] }}</p>
+                <p><strong>User ID:</strong> {{ resume['userID'] }}</p>
+                <p><strong>File Type:</strong> {{ resume['fileType'] }}</p>
+                <!-- Download link unchanged -->
+                <a href="{{ url_for('download_resume', resumeID=resume['resumeID']) }}" class="btn btn-primary download-button">Download Resume</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No resumes found for this post.</p>
+        {% endif %}
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.12/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

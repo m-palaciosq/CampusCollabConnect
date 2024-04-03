@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, abort
+import io
 from mysql.connector import Error
 import dbConn
 import key
+from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = key.makeKey()
@@ -75,15 +77,26 @@ def create_user(email, password, first_name, last_name):
             cursor.close()
             conn.close()
 
-@app.route('/create_account', methods=['POST'])
+@app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
-    email = request.form['email']
-    password = request.form['password']
-    first_name = request.form['firstName']
-    last_name = request.form['lastName']
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        first_name = request.form.get('firstName')
+        last_name = request.form.get('lastName')
 
-    result = create_user(email, password, first_name, last_name)
-    return result
+        result = create_user(email, password, first_name, last_name)
+        
+        if result == "Email already exists":
+            return jsonify({'error': 'Email already exists'}), 400
+        elif result == "Error occurred":
+            return jsonify({'error': 'An error occurred during account creation'}), 500
+        else:
+            return jsonify({'success': 'Account created successfully'}), 200
+    else:
+        # For GET requests, render the account creation form
+        return render_template('account_creation.html')
+
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_project():
@@ -181,7 +194,175 @@ def dashboard():
 
 @app.route('/manage_posts')
 def manage_posts():
-    return render_template('mPostSelection.html')
+    user_id = session.get('user_id')  # Retrieve the current user's ID from the session
+    if not user_id:
+        # If no user is logged in, redirect to the login page
+        flash("Please log in to view your posts.", "warning")
+        return redirect(url_for('login'))
+
+    posts_list = []  # Initialize an empty list to hold the post dictionaries
+    try:
+        conn, cursor = dbConn.get_connection()
+        # Adjust the SQL query to select only posts made by the logged-in user
+        cursor.execute("""
+            SELECT p.postID, u.firstName, u.lastName, p.title, p.description
+            FROM posts p
+            JOIN users u ON p.userID = u.userID
+            WHERE p.userID = %s
+        """, (user_id,))
+        posts = cursor.fetchall()
+        # Convert each tuple to a dictionary
+        for post in posts:
+            post_dict = {
+                'postID': post[0],
+                'username': f"{post[1]} {post[2]}",  # Combine first name and last name
+                'title': post[3],
+                'description': post[4]
+            }
+            posts_list.append(post_dict)
+    except Exception as e:
+        print(f"An error occurred while fetching posts: {e}")
+        flash("An error occurred while fetching your posts.", "error")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return render_template('mPostSelection.html', posts=posts_list)
+
+@app.route('/view_resumes/<int:postID>')
+def view_resumes(postID):
+    if 'user_id' not in session:
+        flash('Please log in to view resumes.', 'info')
+        return redirect(url_for('login'))
+
+    try:
+        conn, cursor = dbConn.get_connection()
+        # Updated query to include firstName and lastName from the users table
+        cursor.execute("""
+            SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName
+            FROM resumes r
+            JOIN users u ON r.userID = u.userID
+            WHERE r.postID = %s
+        """, (postID,))
+        # Fetching data and converting to a list of dictionaries
+        resumes = [{
+            'resumeID': row[0], 
+            'userID': row[1], 
+            'fileType': row[2], 
+            'firstName': row[3], 
+            'lastName': row[4]
+        } for row in cursor.fetchall()]
+    except Exception as e:
+        flash("An error occurred while fetching resumes.", "error")
+        print(f"An error occurred: {e}")  # For debugging purposes
+        resumes = []  # In case of an exception, pass an empty list to the template
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return render_template('view_resumes.html', resumes=resumes, postID=postID)
+
+@app.route('/download_resume/<int:resumeID>')
+def download_resume(resumeID):
+    if 'user_id' not in session:
+        flash('Please log in to download resumes.', 'info')
+        return redirect(url_for('login'))
+    
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
+        resume = cursor.fetchone()
+        if resume:
+            resume_file, file_type = resume
+            # Create a generic file name based on resumeID and fileType
+            file_name = f"resume_{resumeID}.{file_type}"
+            return send_file(
+                io.BytesIO(resume_file),
+                mimetype='application/octet-stream',  # Consider adjusting based on fileType
+                as_attachment=True,
+                download_name=file_name  # Uses the generic file name
+            )
+        else:
+            flash("Resume not found.", "error")
+            return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
+    except Exception as e:
+        flash("An error occurred while downloading the resume.", "error")
+        print(f"An error occurred: {e}")  # For debugging
+        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+@app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
+def edit_post(post_id):
+    if request.method == 'POST':
+        # Retrieve updated details from the form submission
+        title = request.form['title']
+        description = request.form['description']
+        task_outline = request.form['task_outline']
+        research_requirements = request.form['research_requirements']
+
+        try:
+            conn, cursor = dbConn.get_connection()
+            # Update post
+            cursor.execute("""
+                UPDATE posts SET title = %s, description = %s WHERE postID = %s
+            """, (title, description, post_id))
+            
+            # First, delete existing entries
+            cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
+            cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
+            
+            # Insert new tasks and research requirements
+            for task in task_outline.split(';'):
+                cursor.execute("INSERT INTO tasks (postID, taskDescription) VALUES (%s, %s)", (post_id, task.strip()))
+            for requirement in research_requirements.split(';'):
+                cursor.execute("INSERT INTO researchReqs (postID, requirementDesc) VALUES (%s, %s)", (post_id, requirement.strip()))
+            
+            conn.commit()
+            flash('Post updated successfully.')
+            return redirect(url_for('manage_posts'))
+        except Exception as e:
+            conn.rollback()  # Roll back in case of error
+            flash('An error occurred while updating the post.')
+            print(f"An error occurred: {e}")
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+    else:
+        # Handle GET request by fetching post details to pre-fill the form
+        try:
+            conn, cursor = dbConn.get_connection()
+            cursor.execute("SELECT title, description FROM posts WHERE postID = %s", (post_id,))
+            post = cursor.fetchone()
+            if post:
+                # Fetch tasks and research requirements
+                cursor.execute("SELECT taskDescription FROM tasks WHERE postID = %s", (post_id,))
+                tasks = '; '.join([task[0] for task in cursor.fetchall()])
+                cursor.execute("SELECT requirementDesc FROM researchReqs WHERE postID = %s", (post_id,))
+                requirements = '; '.join([req[0] for req in cursor.fetchall()])
+                post_details = {
+                    'title': post[0],
+                    'description': post[1],
+                    'tasks': tasks,
+                    'requirements': requirements
+                }
+                return render_template('edit_post.html', post=post_details, post_id=post_id)
+        except Exception as e:
+            flash('An error occurred while fetching the post details.')
+            print(f"An error occurred: {e}")
+        finally:
+            if conn.is_connected():
+                cursor.close()
+                conn.close()
+
+        return redirect(url_for('manage_posts'))
+
+
 
 @app.route('/sign_out')
 def sign_out():

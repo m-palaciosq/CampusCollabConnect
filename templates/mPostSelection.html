@@ -4,67 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Please Select a Post</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <style>
-        /* styles for post container */
+        body {
+            background-color: #f8f9fa;
+        }
         .post {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
         }
-        /* styles for post title */
         .post h2 {
-            font-size: 20px;
-            margin-bottom: 5px;
+            color: #007bff;
         }
-        /* styles for post body */
         .post p {
             font-size: 16px;
         }
-        /* styles for back button */
+        .edit-button, .view-resumes-button, #back-button {
+            margin-top: 20px;
+        }
         #back-button {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            width: auto;
+            padding: 10px 15px;
+        }
+        .header-area {
+            margin-bottom: 40px;
         }
     </style>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Sample data representing posts
-            var posts = [
-                { title: "Post 1", body: "This is the body of post 1." },
-                { title: "Post 2", body: "This is the body of post 2." },
-                { title: "Post 3", body: "This is the body of post 3." }
-            ];
-
-            // Loop through each post and append it to the #posts-container
-            posts.forEach(function(post) {
-                var postHtml = `
-                    <div class="post">
-                        <h2>${post.title}</h2>
-                        <p>${post.body}</p>
-                    </div>
-                `;
-                $('#posts-container').append(postHtml);
-            });
-
-            $('#back-button').click(function() {
-                window.location.href = "CCCDashboard.html";
-            });
-        });
-    </script>
 </head>
-<body>
-    <h1>Please Select a Post</h1>
-    <div id="posts-container">
-        <!-- Posts will be dynamically inserted here -->
+<body class="container">
+    <div class="header-area text-center">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary" id="back-button">Back to Dashboard</a>
+        <h1 class="mt-5">Please Select a Post</h1>
+        <p class="lead">Here you can view, edit your posts, and review submitted resumes.</p>
     </div>
-    <button id="back-button">Back to Dashboard</button>
+    <div id="posts-container">
+        {% for post in posts %}
+        <div class="post">
+            <h2>{{ post['title'] }}</h2>
+            <p>{{ post['description'] }}</p>
+            <p>Posted by: {{ post['username'] }}</p>
+            <a href="{{ url_for('edit_post', post_id=post['postID']) }}" class="btn btn-primary edit-button">Edit</a>
+            <!-- View Resumes button -->
+            <a href="{{ url_for('view_resumes', postID=post['postID']) }}" class="btn btn-info view-resumes-button">View Resumes</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.12/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
