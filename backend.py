@@ -269,7 +269,7 @@ def download_resume(resumeID):
     if 'user_id' not in session:
         flash('Please log in to download resumes.', 'info')
         return redirect(url_for('login'))
-
+    
     try:
         conn, cursor = dbConn.get_connection()
         cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
@@ -287,11 +287,11 @@ def download_resume(resumeID):
             )
         else:
             flash("Resume not found.", "error")
-            return redirect(url_for('view_resumes', postID=session.get('current_postID')))
+            return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
     except Exception as e:
         flash("An error occurred while downloading the resume.", "error")
-        print(f"An error occurred: {e}")
-        return redirect(url_for('view_resumes', postID=session.get('current_postID')))
+        print(f"An error occurred: {e}")  # For debugging
+        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
     finally:
         if conn and conn.is_connected():
             cursor.close()
