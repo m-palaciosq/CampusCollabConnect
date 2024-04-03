@@ -229,8 +229,8 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/view_resumes/<int:post_id>')
-def view_resumes(post_id):
+@app.route('/view_resumes/<int:postID>')  # Change here
+def view_resumes(postID):  # And here
     # Check if the user is logged in
     if 'user_id' not in session:
         flash('Please log in to view resumes', 'error')
@@ -240,20 +240,20 @@ def view_resumes(post_id):
         # Establish database connection
         conn, cursor = dbConn.get_connection()
 
-        # Fetch resumes for the specific post_id
+        # Fetch resumes for the specific postID
         cursor.execute("""
-            SELECT r.resume_id, r.user_id, u.firstName, u.lastName, r.fileType
+            SELECT r.resume_id, r.user_id, u.firstName, u.lastName, r.submission_date, r.fileType  # Adjusted for missing submission_date in original
             FROM resumes r
             JOIN users u ON r.user_id = u.userID
-            WHERE r.postID = %s
-        """, (post_id,))
+            WHERE r.postID = %s  # This matches the database column name now
+        """, (postID,))  # And here
 
         # Fetch all the resume records and prepare them for the template
         resumes = [{
             'id': row[0],
             'user_id': row[1],
             'name': f"{row[2]} {row[3]}",
-            'submission_date': row[4].strftime('%Y-%m-%d'),
+            'submission_date': row[4].strftime('%Y-%m-%d'),  # Ensure you have imported datetime for this operation if needed
             'file_type': row[5]
         } for row in cursor.fetchall()]
 
@@ -268,7 +268,7 @@ def view_resumes(post_id):
             conn.close()
 
     # Render the view_resumes.html template, passing the fetched resumes
-    return render_template('view_resumes.html', resumes=resumes, post_id=post_id)
+    return render_template('view_resumes.html', resumes=resumes, postID=postID)  # Adjust the passing variable to match in the template
 
 @app.route('/download_resume/<int:resume_id>')
 def download_resume(resume_id):
