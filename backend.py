@@ -230,7 +230,7 @@ def manage_posts():
     return render_template('mPostSelection.html', posts=posts_list)
 
 @app.route('/view_resumes/<int:post_id>')
-def view_resumes(postID):
+def view_resumes(post_id):
     # Check if the user is logged in
     if 'user_id' not in session:
         flash('Please log in to view resumes', 'error')
@@ -242,11 +242,11 @@ def view_resumes(postID):
 
         # Fetch resumes for the specific post_id
         cursor.execute("""
-            SELECT r.resume_id, r.user_id, u.firstName, u.lastName, r.submission_date, r.fileType
+            SELECT r.resume_id, r.user_id, u.firstName, u.lastName, r.fileType
             FROM resumes r
             JOIN users u ON r.user_id = u.userID
             WHERE r.postID = %s
-        """, (postID,))
+        """, (post_id,))
 
         # Fetch all the resume records and prepare them for the template
         resumes = [{
@@ -268,7 +268,7 @@ def view_resumes(postID):
             conn.close()
 
     # Render the view_resumes.html template, passing the fetched resumes
-    return render_template('view_resumes.html', resumes=resumes, post_id=postID)
+    return render_template('view_resumes.html', resumes=resumes, post_id=post_id)
 
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
