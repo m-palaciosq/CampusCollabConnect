@@ -277,7 +277,7 @@ def download_resume(resumeID):
         if resume:
             resume_file, file_type = resume
             # Generate a file name for the download, you might want to include more specific naming logic
-            file_name = f"resume_{resumeID}.{file_type}"
+            file_name = f"resume{resumeID}.{file_type}"
             return send_file(
                 io.BytesIO(resume_file),
                 as_attachment=True,
