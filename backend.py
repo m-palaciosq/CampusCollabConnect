@@ -236,20 +236,27 @@ def view_resumes(postID):
         flash('Please log in to view resumes.', 'info')
         return redirect(url_for('login'))
 
-    resumes = []
     try:
         conn, cursor = dbConn.get_connection()
+        # Updated query to include firstName and lastName from the users table
         cursor.execute("""
-            SELECT resumeID, userID, postID, resumeFile, fileType
-            FROM resumes
-            WHERE postID = %s
+            SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName
+            FROM resumes r
+            JOIN users u ON r.userID = u.userID
+            WHERE r.postID = %s
         """, (postID,))
-        # Convert fetched tuples to dictionaries
-        resume_fields = ['resumeID', 'userID', 'postID', 'resumeFile', 'fileType']
-        resumes = [dict(zip(resume_fields, row)) for row in cursor.fetchall()]
+        # Fetching data and converting to a list of dictionaries
+        resumes = [{
+            'resumeID': row[0], 
+            'userID': row[1], 
+            'fileType': row[2], 
+            'firstName': row[3], 
+            'lastName': row[4]
+        } for row in cursor.fetchall()]
     except Exception as e:
         flash("An error occurred while fetching resumes.", "error")
-        print(f"An error occurred: {e}")
+        print(f"An error occurred: {e}")  # For debugging purposes
+        resumes = []  # In case of an exception, pass an empty list to the template
     finally:
         if conn and conn.is_connected():
             cursor.close()

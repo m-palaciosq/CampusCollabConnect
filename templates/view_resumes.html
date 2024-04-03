@@ -37,15 +37,16 @@
         <a href="{{ url_for('manage_posts') }}" class="btn btn-secondary" id="back-button">Back to Posts</a>
         <h1 class="mt-5">Submitted Resumes for Post ID: {{ postID }}</h1>
         <p class="lead">Review and download submitted resumes.</p>
-    </div>
+ </div>
     <div id="resumes-container">
         {% if resumes %}
             {% for resume in resumes %}
             <div class="resume">
-                <h2>Resume ID: {{ resume['resumeID'] }}</h2>
+                <h2>User Name: {{ resume['firstName'] }} {{ resume['lastName'] }}</h2>
+                <p><strong>Resume ID:</strong> {{ resume['resumeID'] }}</p>
                 <p><strong>User ID:</strong> {{ resume['userID'] }}</p>
                 <p><strong>File Type:</strong> {{ resume['fileType'] }}</p>
-                <!-- Assuming the download route expects a resumeID parameter -->
+                <!-- Download link unchanged -->
                 <a href="{{ url_for('download_resume', resumeID=resume['resumeID']) }}" class="btn btn-primary download-button">Download Resume</a>
             </div>
             {% endfor %}
