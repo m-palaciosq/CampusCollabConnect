@@ -269,28 +269,29 @@ def download_resume(resumeID):
     if 'user_id' not in session:
         flash('Please log in to download resumes.', 'info')
         return redirect(url_for('login'))
-    
+
     try:
         conn, cursor = dbConn.get_connection()
         cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
         resume = cursor.fetchone()
         if resume:
-            resume_file, file_type = resume
-            # Create a generic file name based on resumeID and fileType
-            file_name = f"resume_{resumeID}.{file_type}"
+            resume_file, file_extension = resume
+            file_name = f"resume_{resumeID}.{file_extension}"
+            # Dynamically set MIME type
+            mime_type = 'application/pdf' if file_extension == 'pdf' else 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' if file_extension == 'docx' else 'application/octet-stream'
             return send_file(
                 io.BytesIO(resume_file),
-                mimetype='application/octet-stream',  # Consider adjusting based on fileType
+                mimetype=mime_type,
                 as_attachment=True,
-                download_name=file_name  # Uses the generic file name
+                attachment_filename=file_name
             )
         else:
             flash("Resume not found.", "error")
-            return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
+            return redirect(url_for('view_resumes', postID=session.get('current_postID')))
     except Exception as e:
         flash("An error occurred while downloading the resume.", "error")
-        print(f"An error occurred: {e}")  # For debugging
-        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
+        print(f"An error occurred: {e}")
+        return redirect(url_for('view_resumes', postID=session.get('current_postID')))
     finally:
         if conn and conn.is_connected():
             cursor.close()
