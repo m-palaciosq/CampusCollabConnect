@@ -190,6 +190,7 @@ def dashboard():
         first_name = None
     
     return render_template('CCCDashboard.html', first_name=first_name)
+
 @app.route('/manage_posts')
 def manage_posts():
     user_id = session.get('user_id')  # Retrieve the current user's ID from the session
