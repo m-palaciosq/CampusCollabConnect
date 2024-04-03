@@ -229,7 +229,7 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/view_resumes/<int:postID>')
+@app.route('/view_resumes/<int:post_id>')
 def view_resumes(post_id):
     # Check if the user is logged in
     if 'user_id' not in session:
