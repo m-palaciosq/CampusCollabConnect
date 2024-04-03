@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
-import os
 from mysql.connector import Error
 import dbConn
 import key
+from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = key.makeKey()
@@ -76,15 +76,26 @@ def create_user(email, password, first_name, last_name):
             cursor.close()
             conn.close()
 
-@app.route('/create_account', methods=['POST'])
+@app.route('/create_account', methods=['GET', 'POST'])
 def create_account():
-    email = request.form['email']
-    password = request.form['password']
-    first_name = request.form['firstName']
-    last_name = request.form['lastName']
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        first_name = request.form.get('firstName')
+        last_name = request.form.get('lastName')
 
-    result = create_user(email, password, first_name, last_name)
-    return result
+        result = create_user(email, password, first_name, last_name)
+        
+        if result == "Email already exists":
+            return jsonify({'error': 'Email already exists'}), 400
+        elif result == "Error occurred":
+            return jsonify({'error': 'An error occurred during account creation'}), 500
+        else:
+            return jsonify({'success': 'Account created successfully'}), 200
+    else:
+        # For GET requests, render the account creation form
+        return render_template('account_creation.html')
+
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_project():
@@ -179,17 +190,24 @@ def dashboard():
         first_name = None
     
     return render_template('CCCDashboard.html', first_name=first_name)
-
 @app.route('/manage_posts')
 def manage_posts():
+    user_id = session.get('user_id')  # Retrieve the current user's ID from the session
+    if not user_id:
+        # If no user is logged in, redirect to the login page
+        flash("Please log in to view your posts.", "warning")
+        return redirect(url_for('login'))
+
     posts_list = []  # Initialize an empty list to hold the post dictionaries
     try:
         conn, cursor = dbConn.get_connection()
+        # Adjust the SQL query to select only posts made by the logged-in user
         cursor.execute("""
             SELECT p.postID, u.firstName, u.lastName, p.title, p.description
             FROM posts p
             JOIN users u ON p.userID = u.userID
-        """)
+            WHERE p.userID = %s
+        """, (user_id,))
         posts = cursor.fetchall()
         # Convert each tuple to a dictionary
         for post in posts:
@@ -202,12 +220,14 @@ def manage_posts():
             posts_list.append(post_dict)
     except Exception as e:
         print(f"An error occurred while fetching posts: {e}")
+        flash("An error occurred while fetching your posts.", "error")
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
     return render_template('mPostSelection.html', posts=posts_list)
+
 
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
@@ -274,64 +294,6 @@ def edit_post(post_id):
                 conn.close()
 
         return redirect(url_for('manage_posts'))
-    
-    
-    
-# Define a function to fetch and display submitted resumes for a specific job post
-@app.route('/posts/<int:post_id>/resumes')
-def view_resumes(post_id):
-    if 'user_id' not in session:
-        flash('Please log in to view resumes.', 'error')
-        return redirect(url_for('login'))
-    
-    conn = dbConn.get_connection()
-    user_id = session['user_id']
-
-    # Check if the logged-in user is the author of the post
-    if not user_is_author_of_post(conn, user_id, post_id):
-        flash('You do not have permission to view these resumes.', 'error')
-        return redirect(url_for('dashboard'))
-
-    resumes = fetch_resumes_for_post(conn, post_id)
-    job_post_title = get_job_post_title(conn, post_id)
-
-    return render_template('review_resumes.html', resumes=resumes, job_post_title=job_post_title)
-
-# Helper function to fetch resumes for a given post
-def fetch_resumes_for_post(conn, post_id):
-    try:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT r.resumeID, u.firstName, u.lastName, r.fileType, r.resumeFile
-            FROM resumes r
-            JOIN users u ON r.userID = u.userID
-            WHERE r.postID = %s
-        """, (post_id,))
-        resumes = [{
-            'id': row[0],
-            'applicant_name': f"{row[1]} {row[2]}",
-            'file_type': row[3]
-            # You might include a mechanism to handle the actual file here
-        } for row in cursor.fetchall()]
-        return resumes
-    finally:
-        cursor.close()
-
-# Function to fetch the job post title
-def get_job_post_title(conn, post_id):
-    cursor = conn.cursor()
-    cursor.execute("SELECT title FROM posts WHERE postID = %s", (post_id,))
-    title = cursor.fetchone()
-    cursor.close()
-    return title[0] if title else "Unknown"
-
-# Function to check if a user is the author of a post
-def user_is_author_of_post(conn, user_id, post_id):
-    cursor = conn.cursor()
-    cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
-    result = cursor.fetchone()
-    cursor.close()
-    return result and result[0] == user_id
 
 
 
@@ -341,64 +303,38 @@ def sign_out():
 
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
-    # Check if user is logged in
-    if 'user_id' not in session:
-        flash('Please log in to submit a resume.', 'error')
-        return redirect(url_for('login'))
-
-    # Check if the post request has the file part
     if 'resumeFile' not in request.files:
-        flash('No file part', 'error')
+        flash('No file part')
         return redirect(request.url)
     
     file = request.files['resumeFile']
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
     if file.filename == '':
-        flash('No selected file', 'error')
+        flash('No selected file')
         return redirect(request.url)
     
-    # MIME type check
+    # Correctly identify the MIME type of the uploaded file
     file_mimetype = file.mimetype
+
+    # Map the MIME type to your ENUM values and validate
     mime_type_to_enum = {
         'application/pdf': 'pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        # Add more mappings as necessary
     }
-    file_type_enum = mime_type_to_enum.get(file_mimetype)
 
+    file_type_enum = mime_type_to_enum.get(file_mimetype, None)
     if file_type_enum is None:
-        flash("Unsupported file type. Please upload a PDF or DOCX file.", 'error')
+        flash("Unsupported file type. Please upload a PDF or DOCX file.")
         return redirect(request.url)
-    
-    # File size check
-    file.seek(0, os.SEEK_END)
-    file_length = file.tell()
-    if file_length > 5 * 1024 * 1024:  # 5MB
-        flash('File too large. Please upload files up to 5MB.', 'error')
-        return redirect(request.url)
-    file.seek(0)  # Reset file pointer for reading
+
+    user_id = session.get('user_id')
+    post_id = request.form.get('postID')  
 
     # Proceed with saving the resume
-    user_id = session['user_id']
-    post_id = request.form.get('postID')
+    # This time, use file_type_enum instead of content_type for the database insertion
+    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
 
-    try:
-        conn, cursor = dbConn.get_connection()
-        insert_query = """
-        INSERT INTO resumes (userID, postID, resumeFile, fileType)
-        VALUES (%s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (user_id, post_id, file.read(), file_type_enum))
-        conn.commit()
-        flash('Resume uploaded successfully', 'success')
-    except Error as e:
-        print("An error occurred:", e)
-        flash("An error occurred while uploading your resume.", 'error')
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-    
+    flash('Resume uploaded successfully')
     return redirect(url_for('dashboard'))
 
 def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
