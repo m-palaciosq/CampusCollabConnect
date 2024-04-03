@@ -190,6 +190,7 @@ def dashboard():
         first_name = None
     
     return render_template('CCCDashboard.html', first_name=first_name)
+
 @app.route('/manage_posts')
 def manage_posts():
     user_id = session.get('user_id')  # Retrieve the current user's ID from the session
@@ -228,6 +229,46 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
+@app.route('/view_resumes/<int:post_id>')
+def view_resumes(post_id):
+    # Check if the user is logged in
+    if 'user_id' not in session:
+        flash('Please log in to view resumes', 'error')
+        return redirect(url_for('login'))
+    
+    try:
+        # Establish database connection
+        conn, cursor = dbConn.get_connection()
+
+        # Fetch resumes for the specific post_id
+        cursor.execute("""
+            SELECT r.resume_id, r.user_id, u.firstName, u.lastName, r.submission_date, r.fileType
+            FROM resumes r
+            JOIN users u ON r.user_id = u.userID
+            WHERE r.postID = %s
+        """, (post_id,))
+
+        # Fetch all the resume records and prepare them for the template
+        resumes = [{
+            'id': row[0],
+            'user_id': row[1],
+            'name': f"{row[2]} {row[3]}",
+            'submission_date': row[4].strftime('%Y-%m-%d'),
+            'file_type': row[5]
+        } for row in cursor.fetchall()]
+
+    except Exception as e:
+        flash('An error occurred while fetching resumes.', 'error')
+        print(f"An error occurred: {e}")  # Logging the error to the console for debugging
+        resumes = []  # Ensure resumes is a list even if fetching failed
+
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    # Render the view_resumes.html template, passing the fetched resumes
+    return render_template('view_resumes.html', resumes=resumes, post_id=post_id)
 
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
