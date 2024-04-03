@@ -17,13 +17,13 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,.1);
         }
+        .resume h2, .resume p {
+            margin: 0 0 10px 0;
+        }
         .resume h2 {
             color: #007bff;
         }
-        .resume p {
-            font-size: 16px;
-        }
-        .view-button, #back-button {
+        .download-button, #back-button {
             margin-top: 20px;
         }
         #back-button {
@@ -35,22 +35,22 @@
 <body class="container">
     <div class="text-center">
         <a href="{{ url_for('manage_posts') }}" class="btn btn-secondary" id="back-button">Back to Posts</a>
-        <h1 class="mt-5">Submitted Resumes</h1>
+        <h1 class="mt-5">Submitted Resumes for Post ID: {{ postID }}</h1>
         <p class="lead">Review and download submitted resumes.</p>
     </div>
     <div id="resumes-container">
         {% if resumes %}
             {% for resume in resumes %}
             <div class="resume">
-                <h2>{{ resume['name'] }}</h2> <!-- Ensure this matches the key passed from the backend -->
-                <!-- Update the route names and parameters according to your Flask app's URL mappings -->
-                <a href="{{ url_for('download_resume', resume_id=resume['id']) }}" class="btn btn-primary view-button">Download Resume</a>
-                <!-- Uncomment or modify this next line based on your actual implementation for inline viewing -->
-                <!-- <a href="{{ url_for('view_resume_inline', resume_id=resume['id']) }}" class="btn btn-info view-button">View Resume</a> -->
+                <h2>Resume ID: {{ resume['resumeID'] }}</h2>
+                <p><strong>User ID:</strong> {{ resume['userID'] }}</p>
+                <p><strong>File Type:</strong> {{ resume['fileType'] }}</p>
+                <!-- Assuming the download route expects a resumeID parameter -->
+                <a href="{{ url_for('download_resume', resumeID=resume['resumeID']) }}" class="btn btn-primary download-button">Download Resume</a>
             </div>
             {% endfor %}
         {% else %}
-            <p>No resumes found.</p>
+            <p>No resumes found for this post.</p>
         {% endif %}
     </div>
     
