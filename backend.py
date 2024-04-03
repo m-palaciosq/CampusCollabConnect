@@ -275,15 +275,14 @@ def download_resume(resumeID):
         cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
         resume = cursor.fetchone()
         if resume:
-            resume_file, file_extension = resume
-            file_name = f"resume_{resumeID}.{file_extension}"
-            # Dynamically set MIME type
-            mime_type = 'application/pdf' if file_extension == 'pdf' else 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' if file_extension == 'docx' else 'application/octet-stream'
+            resume_file, file_type = resume
+            # Create a generic file name based on resumeID and fileType
+            file_name = f"resume_{resumeID}.{file_type}"
             return send_file(
                 io.BytesIO(resume_file),
-                mimetype=mime_type,
+                mimetype='application/octet-stream',  # Consider adjusting based on fileType
                 as_attachment=True,
-                attachment_filename=file_name
+                download_name=file_name  # Uses the generic file name
             )
         else:
             flash("Resume not found.", "error")
