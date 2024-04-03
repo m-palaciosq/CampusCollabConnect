@@ -229,8 +229,8 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/view_resumes/<int:postID>')  # Change here
-def view_resumes(postID):  # And here
+@app.route('/view_resumes/<int:post_id>')  # Change here
+def view_resumes(post_id):  # And here
     # Check if the user is logged in
     if 'user_id' not in session:
         flash('Please log in to view resumes', 'error')
@@ -246,7 +246,7 @@ def view_resumes(postID):  # And here
             FROM resumes r
             JOIN users u ON r.user_id = u.userID
             WHERE r.postID = %s  # This matches the database column name now
-        """, (postID,))  # And here
+        """, (post_id,))  # And here
 
         # Fetch all the resume records and prepare them for the template
         resumes = [{
@@ -268,7 +268,7 @@ def view_resumes(postID):  # And here
             conn.close()
 
     # Render the view_resumes.html template, passing the fetched resumes
-    return render_template('view_resumes.html', resumes=resumes, postID=postID)  # Adjust the passing variable to match in the template
+    return render_template('view_resumes.html', resumes=resumes, post_id=post_id)  # Adjust the passing variable to match in the template
 
 @app.route('/download_resume/<int:resume_id>')
 def download_resume(resume_id):
