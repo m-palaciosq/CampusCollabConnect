@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, abort
+import io
 from mysql.connector import Error
 import dbConn
 import key
@@ -230,7 +231,7 @@ def manage_posts():
     return render_template('mPostSelection.html', posts=posts_list)
 
 @app.route('/view_resumes/<int:postID>')
-def view_resumes(post_id):
+def view_resumes(postID):
     if 'user_id' not in session:
         flash('Please log in to view resumes.', 'info')
         return redirect(url_for('login'))
@@ -241,7 +242,7 @@ def view_resumes(post_id):
             SELECT resumeID, userID, postID, resumeFile, fileType
             FROM resumes
             WHERE postID = %s
-        """, (post_id,))
+        """, (postID,))
         resumes = cursor.fetchall()
     except Exception as e:
         flash("An error occurred while fetching resumes.", "error")
@@ -252,7 +253,7 @@ def view_resumes(post_id):
             cursor.close()
             conn.close()
 
-    return render_template('view_resumes.html', resumes=resumes, postID=post_id)
+    return render_template('view_resumes.html', resumes=resumes, postID=postID)
 
 @app.route('/download_resume/<int:resumeID>')
 def download_resume(resumeID):
