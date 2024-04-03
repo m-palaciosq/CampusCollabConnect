@@ -229,73 +229,53 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/view_resumes/<int:post_id>')  # Change here
-def view_resumes(post_id):  # And here
-    # Check if the user is logged in
+@app.route('/view_resumes/<int:postID>')
+def view_resumes(post_id):
     if 'user_id' not in session:
-        flash('Please log in to view resumes', 'error')
+        flash('Please log in to view resumes.', 'info')
         return redirect(url_for('login'))
-    
+
     try:
-        # Establish database connection
         conn, cursor = dbConn.get_connection()
-
-        # Fetch resumes for the specific postID
         cursor.execute("""
-            SELECT r.resume_id, r.user_id, u.firstName, u.lastName, r.submission_date, r.fileType  # Adjusted for missing submission_date in original
-            FROM resumes r
-            JOIN users u ON r.user_id = u.userID
-            WHERE r.postID = %s  # This matches the database column name now
-        """, (post_id,))  # And here
-
-        # Fetch all the resume records and prepare them for the template
-        resumes = [{
-            'id': row[0],
-            'user_id': row[1],
-            'name': f"{row[2]} {row[3]}",
-            'submission_date': row[4].strftime('%Y-%m-%d'),  # Ensure you have imported datetime for this operation if needed
-            'file_type': row[5]
-        } for row in cursor.fetchall()]
-
+            SELECT resumeID, userID, postID, resumeFile, fileType
+            FROM resumes
+            WHERE postID = %s
+        """, (post_id,))
+        resumes = cursor.fetchall()
     except Exception as e:
-        flash('An error occurred while fetching resumes.', 'error')
-        print(f"An error occurred: {e}")  # Logging the error to the console for debugging
-        resumes = []  # Ensure resumes is a list even if fetching failed
-
+        flash("An error occurred while fetching resumes.", "error")
+        print(f"An error occurred: {e}")
+        resumes = []
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
-    # Render the view_resumes.html template, passing the fetched resumes
-    return render_template('view_resumes.html', resumes=resumes, post_id=post_id)  # Adjust the passing variable to match in the template
+    return render_template('view_resumes.html', resumes=resumes, postID=post_id)
 
-@app.route('/download_resume/<int:resume_id>')
-def download_resume(resume_id):
-    # Ensure the user is logged in
-    if 'user_id' not in session:
-        flash("Please log in to download resumes.", "info")
-        return redirect(url_for('login'))
-
+@app.route('/download_resume/<int:resumeID>')
+def download_resume(resumeID):
+    # Authentication check here
     try:
         conn, cursor = dbConn.get_connection()
-        cursor.execute("SELECT file_path, file_name FROM resumes WHERE id = %s", (resume_id,))
+        cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
         resume = cursor.fetchone()
-
         if resume:
-            file_path = resume[0]  # The path where the resume file is stored
-            file_name = resume[1]  # The original file name to be used when downloading
-            return send_file(file_path, as_attachment=True, attachment_filename=file_name)
-        else:
-            flash("Resume not found.", "error")
-            return redirect(url_for('view_resumes'))
-
+            resume_data, file_type = resume
+            return send_file(
+                io.BytesIO(resume_data),
+                attachment_filename=f"resume_{resumeID}.{file_type}",
+                as_attachment=True
+            )
     except Exception as e:
-        print(f"An error occurred while downloading the resume: {e}")
-        abort(500)  # Return a server error
+        flash("An error occurred while downloading the resume.", "error")
+        print(f"An error occurred: {e}")
+        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Example redirect, adjust as needed
     finally:
-        cursor.close()
-        conn.close()
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
