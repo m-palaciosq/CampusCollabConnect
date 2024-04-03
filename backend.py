@@ -236,6 +236,7 @@ def view_resumes(postID):
         flash('Please log in to view resumes.', 'info')
         return redirect(url_for('login'))
 
+    resumes = []
     try:
         conn, cursor = dbConn.get_connection()
         cursor.execute("""
@@ -243,11 +244,12 @@ def view_resumes(postID):
             FROM resumes
             WHERE postID = %s
         """, (postID,))
-        resumes = cursor.fetchall()
+        # Convert fetched tuples to dictionaries
+        resume_fields = ['resumeID', 'userID', 'postID', 'resumeFile', 'fileType']
+        resumes = [dict(zip(resume_fields, row)) for row in cursor.fetchall()]
     except Exception as e:
         flash("An error occurred while fetching resumes.", "error")
         print(f"An error occurred: {e}")
-        resumes = []
     finally:
         if conn and conn.is_connected():
             cursor.close()
