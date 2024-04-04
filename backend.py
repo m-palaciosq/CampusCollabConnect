@@ -4,7 +4,6 @@ import io
 from mysql.connector import Error
 import dbConn
 import key
-from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = key.makeKey()
@@ -57,6 +56,7 @@ def authenticate_user(email, password):
             cursor.close()
             conn.close()
 
+@app.route('/account_creation')
 def account_creation_form():
     return render_template('account_creation.html')
 
