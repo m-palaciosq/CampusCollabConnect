@@ -57,49 +57,35 @@ def authenticate_user(email, password):
             cursor.close()
             conn.close()
 
+def account_creation_form():
+    return render_template('account_creation.html')
+
 def create_user(email, password, first_name, last_name):
     try:
         conn, cursor = dbConn.get_connection()
-
         cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         if cursor.fetchone():
             return "Email already exists"
-
         sql_query = "INSERT INTO users (email, p_word, firstName, lastName) VALUES (%s, %s, %s, %s)"
         cursor.execute(sql_query, (email, password, first_name, last_name))
         conn.commit()
-
         return redirect(url_for('login'))
-
     except Error as e:
         print("Error while connecting to MySQL", e)
         return "Error occurred"
-
     finally:
         if conn.is_connected():
             cursor.close()
             conn.close()
 
-@app.route('/create_account', methods=['GET', 'POST'])
+@app.route('/create_account', methods=['POST'])
 def create_account():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        first_name = request.form.get('firstName')
-        last_name = request.form.get('lastName')
-
-        result = create_user(email, password, first_name, last_name)
-        
-        if result == "Email already exists":
-            return jsonify({'error': 'Email already exists'}), 400
-        elif result == "Error occurred":
-            return jsonify({'error': 'An error occurred during account creation'}), 500
-        else:
-            return jsonify({'success': 'Account created successfully'}), 200
-    else:
-        # For GET requests, render the account creation form
-        return render_template('account_creation.html')
-
+    email = request.form['email']
+    password = request.form['password']
+    first_name = request.form['firstName']
+    last_name = request.form['lastName']
+    result = create_user(email, password, first_name, last_name)
+    return result
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_project():
