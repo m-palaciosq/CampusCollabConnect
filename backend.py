@@ -275,25 +275,35 @@ def download_resume(resumeID):
     
     try:
         conn, cursor = dbConn.get_connection()
-        cursor.execute("SELECT resumeFile, fileType FROM resumes WHERE resumeID = %s", (resumeID,))
+        # Adjust the query to also fetch the user's first and last name
+        cursor.execute("""
+            SELECT r.resumeFile, r.fileType, u.firstName, u.lastName 
+            FROM resumes r
+            JOIN users u ON r.userID = u.userID
+            WHERE r.resumeID = %s
+        """, (resumeID,))
         resume = cursor.fetchone()
         if resume:
-            resume_file, file_type = resume
-            # Create a generic file name based on resumeID and fileType
-            file_name = f"resume_{resumeID}.{file_type}"
+            resume_file, file_type, first_name, last_name = resume
+            # Use the user's name to create a more descriptive filename
+            # Ensure the names are safe to use in a filename
+            safe_first_name = "".join(x for x in first_name if x.isalnum())
+            safe_last_name = "".join(x for x in last_name if x.isalnum())
+            filename = f"{safe_first_name}_{safe_last_name}_Resume.{file_type}"
+            
             return send_file(
                 io.BytesIO(resume_file),
-                mimetype='application/octet-stream',  # Consider adjusting based on fileType
+                mimetype='application/octet-stream',  # Adjust based on fileType
                 as_attachment=True,
-                download_name=file_name  # Uses the generic file name
+                download_name=filename
             )
         else:
             flash("Resume not found.", "error")
-            return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
+            return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))
     except Exception as e:
         flash("An error occurred while downloading the resume.", "error")
         print(f"An error occurred: {e}")  # For debugging
-        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))  # Adjust as necessary
+        return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))
     finally:
         if conn and conn.is_connected():
             cursor.close()
