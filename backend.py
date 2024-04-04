@@ -183,16 +183,14 @@ def dashboard():
 
 @app.route('/manage_posts')
 def manage_posts():
-    user_id = session.get('user_id')  # Retrieve the current user's ID from the session
+    user_id = session.get('user_id')
     if not user_id:
-        # If no user is logged in, redirect to the login page
         flash("Please log in to view your posts.", "warning")
         return redirect(url_for('login'))
 
-    posts_list = []  # Initialize an empty list to hold the post dictionaries
+    posts_list = [] 
     try:
         conn, cursor = dbConn.get_connection()
-        # Adjust the SQL query to select only posts made by the logged-in user
         cursor.execute("""
             SELECT p.postID, u.firstName, u.lastName, p.title, p.description
             FROM posts p
@@ -200,11 +198,10 @@ def manage_posts():
             WHERE p.userID = %s
         """, (user_id,))
         posts = cursor.fetchall()
-        # Convert each tuple to a dictionary
         for post in posts:
             post_dict = {
                 'postID': post[0],
-                'username': f"{post[1]} {post[2]}",  # Combine first name and last name
+                'username': f"{post[1]} {post[2]}",
                 'title': post[3],
                 'description': post[4]
             }
@@ -227,14 +224,12 @@ def view_resumes(postID):
 
     try:
         conn, cursor = dbConn.get_connection()
-        # Updated query to include firstName and lastName from the users table
         cursor.execute("""
             SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName
             FROM resumes r
             JOIN users u ON r.userID = u.userID
             WHERE r.postID = %s
         """, (postID,))
-        # Fetching data and converting to a list of dictionaries
         resumes = [{
             'resumeID': row[0], 
             'userID': row[1], 
@@ -244,8 +239,8 @@ def view_resumes(postID):
         } for row in cursor.fetchall()]
     except Exception as e:
         flash("An error occurred while fetching resumes.", "error")
-        print(f"An error occurred: {e}")  # For debugging purposes
-        resumes = []  # In case of an exception, pass an empty list to the template
+        print(f"An error occurred: {e}")
+        resumes = []
     finally:
         if conn and conn.is_connected():
             cursor.close()
@@ -261,7 +256,6 @@ def download_resume(resumeID):
     
     try:
         conn, cursor = dbConn.get_connection()
-        # Adjust the query to also fetch the user's first and last name
         cursor.execute("""
             SELECT r.resumeFile, r.fileType, u.firstName, u.lastName 
             FROM resumes r
@@ -271,15 +265,13 @@ def download_resume(resumeID):
         resume = cursor.fetchone()
         if resume:
             resume_file, file_type, first_name, last_name = resume
-            # Use the user's name to create a more descriptive filename
-            # Ensure the names are safe to use in a filename
             safe_first_name = "".join(x for x in first_name if x.isalnum())
             safe_last_name = "".join(x for x in last_name if x.isalnum())
             filename = f"{safe_first_name}_{safe_last_name}_Resume.{file_type}"
             
             return send_file(
                 io.BytesIO(resume_file),
-                mimetype='application/octet-stream',  # Adjust based on fileType
+                mimetype='application/octet-stream',
                 as_attachment=True,
                 download_name=filename
             )
@@ -288,7 +280,7 @@ def download_resume(resumeID):
             return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))
     except Exception as e:
         flash("An error occurred while downloading the resume.", "error")
-        print(f"An error occurred: {e}")  # For debugging
+        print(f"An error occurred: {e}")
         return redirect(url_for('view_resumes', postID=session.get('current_postID', 0)))
     finally:
         if conn and conn.is_connected():
@@ -298,7 +290,6 @@ def download_resume(resumeID):
 @app.route('/edit_post/<int:post_id>', methods=['GET', 'POST'])
 def edit_post(post_id):
     if request.method == 'POST':
-        # Retrieve updated details from the form submission
         title = request.form['title']
         description = request.form['description']
         task_outline = request.form['task_outline']
@@ -306,16 +297,13 @@ def edit_post(post_id):
 
         try:
             conn, cursor = dbConn.get_connection()
-            # Update post
             cursor.execute("""
                 UPDATE posts SET title = %s, description = %s WHERE postID = %s
             """, (title, description, post_id))
             
-            # First, delete existing entries
             cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
             cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
             
-            # Insert new tasks and research requirements
             for task in task_outline.split(';'):
                 cursor.execute("INSERT INTO tasks (postID, taskDescription) VALUES (%s, %s)", (post_id, task.strip()))
             for requirement in research_requirements.split(';'):
@@ -325,7 +313,7 @@ def edit_post(post_id):
             flash('Post updated successfully.')
             return redirect(url_for('manage_posts'))
         except Exception as e:
-            conn.rollback()  # Roll back in case of error
+            conn.rollback()
             flash('An error occurred while updating the post.')
             print(f"An error occurred: {e}")
         finally:
@@ -333,13 +321,11 @@ def edit_post(post_id):
                 cursor.close()
                 conn.close()
     else:
-        # Handle GET request by fetching post details to pre-fill the form
         try:
             conn, cursor = dbConn.get_connection()
             cursor.execute("SELECT title, description FROM posts WHERE postID = %s", (post_id,))
             post = cursor.fetchone()
             if post:
-                # Fetch tasks and research requirements
                 cursor.execute("SELECT taskDescription FROM tasks WHERE postID = %s", (post_id,))
                 tasks = '; '.join([task[0] for task in cursor.fetchall()])
                 cursor.execute("SELECT requirementDesc FROM researchReqs WHERE postID = %s", (post_id,))
@@ -361,8 +347,6 @@ def edit_post(post_id):
 
         return redirect(url_for('manage_posts'))
 
-
-
 @app.route('/sign_out')
 def sign_out():
     return redirect(url_for('login'))
@@ -378,14 +362,11 @@ def submit_resume():
         flash('No selected file')
         return redirect(request.url)
     
-    # Correctly identify the MIME type of the uploaded file
     file_mimetype = file.mimetype
 
-    # Map the MIME type to your ENUM values and validate
     mime_type_to_enum = {
         'application/pdf': 'pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
-        # Add more mappings as necessary
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
     }
 
     file_type_enum = mime_type_to_enum.get(file_mimetype, None)
@@ -396,9 +377,7 @@ def submit_resume():
     user_id = session.get('user_id')
     post_id = request.form.get('postID')  
 
-    # Proceed with saving the resume
-    # This time, use file_type_enum instead of content_type for the database insertion
-    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
+    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
 
     flash('Resume uploaded successfully')
     return redirect(url_for('dashboard'))
@@ -415,8 +394,6 @@ def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
-
 
 @app.route('/search')
 def search():
@@ -443,7 +420,6 @@ def search():
     cursor.close()
     conn.close()
 
-    # Transforming the result into a list of dictionaries for easier handling in the template
     job_posts_dicts = [
         {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4]}
         for post in job_posts

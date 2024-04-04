@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Creation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap"> <!-- Google Fonts - Roboto -->
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            font-family: 'Roboto', sans-serif;
+            background-image: url('{{ url_for('static', filename='UNCG2.jpg') }}');
+            background-size: cover;
             margin: 0;
             padding: 0;
             display: flex;
@@ -15,24 +18,29 @@
             align-items: center;
             height: 100vh;
         }
-
-        form {
-            background-color: #fff;
-            padding: 20px;
+        
+        .card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
         }
-
+        
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            color: #333; /* Adjust font color */
         }
-
+        
         label {
             display: block;
             margin-bottom: 8px;
+            color: #555; /* Adjust font color */
         }
-
+        
         input[type="email"],
         input[type="password"],
         input[type="text"] {
@@ -43,7 +51,7 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
-
+        
         input[type="submit"] {
             width: 100%;
             padding: 10px;
@@ -54,29 +62,27 @@
             cursor: pointer;
             transition: background-color 0.3s;
         }
-
+        
         input[type="submit"]:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <form action="/create_account" method="post">
-        <h1>Create Your Account</h1>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-
-        <label for="firstName">First Name:</label>
-        <input type="text" id="firstName" name="firstName" required>
-
-        <label for="lastName">Last Name:</label>
-        <input type="text" id="lastName" name="lastName" required>
-
-        <input type="submit" value="Create Account">
-    </form>
+    <div class="card">
+        <h1><i class="fas fa-user-plus"></i> Create Your Account</h1> <!-- Added icon -->
+        <form id="accountCreationForm" action="/create_account" method="post">
+            <label for="firstName">First Name:</label>
+            <input type="text" id="firstName" name="firstName" required>
+            <label for="lastName">Last Name:</label>
+            <input type="text" id="lastName" name="lastName" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Create Account">
+        </form>
+    </div>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function() {

@@ -1,142 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Project - Campus, Collab, Connect</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        
-        header {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 0;
-        }
-        
-        nav {
-            display: flex;
-            justify-content: flex-start; /* Align items to the start (left) */
-            align-items: center;
-            padding: 10px 20px;
-        }
-        
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        nav ul li {
-            display: inline;
-            margin-right: 20px;
-        }
-        
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        
-        main {
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-        }
-        
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        label {
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
-        input[type="text"],
-        textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #0056b3;
-        }
-        
-        footer {
-            background-color: #f2f2f2;
-            padding: 20px 0;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="dashboard">Home</a></li>
-            </ul>
-        </nav>
-    </header>
-    <main>
-        <section>
-            <div class="container">
-                <h1>Create a New Project</h1>
-                <form id="create-project-form" action="{{ url_for('create_project') }}" method="post">
-                    <label for="title">Project Title:</label>
-                    <input type="text" id="title" name="title" required>
-                    
-                    <label for="description">Project Description:</label>
-                    <textarea id="description" name="description" required></textarea>
-                    
-                    <label for="task_outline">Task Outline:</label>
-                    <textarea id="task_outline" name="task_outline" required></textarea>
-                    
-                    <label for="research_requirements">Research Requirements:</label>
-                    <textarea id="research_requirements" name="research_requirements" required></textarea>
-                    
-                    <button type="submit">Create Project</button>
-                </form>
-            </div>
-        </section>
-    </main>
-</body>
-</html> -->
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,6 +9,10 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
+            background-image: url('{{ url_for('static', filename='1.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
         }
 
         header {
@@ -156,7 +21,7 @@
 
         nav {
             display: flex;
-            justify-content: flex-start; /* Align items to the start (left) */
+            justify-content: flex-start;
             align-items: center;
             padding: 10px 20px;
         }
@@ -179,10 +44,16 @@
             padding: 10px 20px;
             background-color: #007bff;
             border-radius: 5px;
+            display: flex;
+            align-items: center;
         }
 
         nav ul li a.home-button:hover {
             background-color: #0056b3;
+        }
+
+        .home-icon {
+            margin-right: 5px;
         }
 
         main {
@@ -208,6 +79,7 @@
         label {
             margin-bottom: 10px;
             font-weight: bold;
+            color: white;
         }
 
         input[type="text"],
@@ -243,7 +115,7 @@
     <header>
         <nav>
             <ul>
-                <li><a href="dashboard" class="home-button">Home</a></li>
+                <li><a href="dashboard" class="home-button"><span class="home-icon">🏠</span> Home</a></li>
             </ul>
         </nav>
     </header>
