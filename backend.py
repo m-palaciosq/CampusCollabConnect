@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from werkzeug.exceptions import RequestEntityTooLarge
 import io
 from mysql.connector import Error
 import dbConn
@@ -14,6 +15,8 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
+
 
         user = authenticate_user(email, password)
         
@@ -451,6 +454,11 @@ def search():
     ]
 
     return render_template('CCCSearch.html', job_posts=job_posts_dicts)
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_large_file_error(e):
+    flash('File too large. Please upload a file smaller than 16MB.')
+    return redirect(request.url), 413
 
 if __name__ == '__main__':
     app.run(debug=True)
