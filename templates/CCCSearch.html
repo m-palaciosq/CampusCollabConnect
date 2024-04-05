@@ -125,19 +125,21 @@
 
 <body>
 
-    <!-- Combined Search and Filter Form -->
+       <!-- Combined Search and Filter Form -->
 
-    <form id="searchForm" action="/search" method="get">
+       <form id="searchForm" action="/search" method="get">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <button type="submit" class="search-button">Search</button>
     </form>
     <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
-
     <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
-        <div class="post-container" data-post-id="{{ post.postID }}" data-tasks="{{ post.tasks }}" data-requirements="{{ post.requirements }}">
+        <div class="post-container" 
+        data-post-id="{{post.postID}}" 
+        data-tasks="{{ post.tasks }}" 
+        data-requirements="{{ post.requirements }}">
             <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
                 {{ post.title }}
             </h4>
@@ -151,6 +153,7 @@
         <p>No job posts found.</p>
         {% endfor %}
     </div>
+
 
     <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
