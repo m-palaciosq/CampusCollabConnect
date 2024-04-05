@@ -421,7 +421,7 @@ def search():
     conn.close()
 
     job_posts_dicts = [
-        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4], 'created_at': post[5]}
+        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4]}
         for post in job_posts
     ]
 
