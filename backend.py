@@ -109,7 +109,7 @@ def create_project():
 
     return render_template('create_project.html', error=None)
 
-def insert_post(user_id, title, description, task_outline, research_requirements, created_at):
+def insert_post(user_id, title, description, task_outline, research_requirements):
     try:
         conn, cursor = dbConn.get_connection()
 
