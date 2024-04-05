@@ -403,7 +403,7 @@ def search():
     conn, cursor = dbConn.get_connection()
 
     query = """
-    SELECT p.postID, p.title, p.description,
+    SELECT p.postID, p.title, p.description, p.created_at, 
            GROUP_CONCAT(DISTINCT t.taskDescription SEPARATOR '; ') AS tasks,
            GROUP_CONCAT(DISTINCT r.requirementDesc SEPARATOR '; ') AS requirements
     FROM posts AS p
@@ -411,17 +411,13 @@ def search():
     LEFT JOIN researchReqs AS r ON p.postID = r.postID
     WHERE p.title LIKE %s OR p.description LIKE %s
     GROUP BY p.postID
-    ORDER BY p.postID
+    ORDER BY p.created_at DESC
     """
     cursor.execute(query, (like_pattern, like_pattern))
-
     job_posts = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-
     job_posts_dicts = [
-        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4]}
+        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4], 'created_at': post[5]}
         for post in job_posts
     ]
 
