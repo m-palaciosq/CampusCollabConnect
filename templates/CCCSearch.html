@@ -133,25 +133,24 @@
     </form>
     <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
-    <!-- Display search results -->
-    <div id="search-results">
-        {% for post in job_posts %}
-        <div class="post-container" 
-        data-post-id="{{post.postID}}" 
-        data-tasks="{{ post.tasks }}" 
-        data-requirements="{{ post.requirements }}">
-            <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
-                {{ post.title }}
-            </h4>
-            <p class="post-description">{{ post.description }}</p>
-            <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
-            <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
-            <p class="post-created-at"><strong>Posted on:</strong> {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        </div>
-        {% else %}
-        <p>No job posts found.</p>
-        {% endfor %}
+<!-- Display search results -->
+<div id="search-results">
+    {% for post in job_posts %}
+    <div class="post-container" 
+    data-post-id="{{ post.postID }}" 
+    data-tasks="{{ post.tasks }}" 
+    data-requirements="{{ post.requirements }}">
+        <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
+            {{ post.title }}
+        </h4>
+        <p class="post-description">{{ post.description }}</p>
+        <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
+        <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
+        <p class="post-created-at"><strong>Posted on:</strong> {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
     </div>
+    {% endfor %}
+</div>
+
 
 
     <!-- Job Post Details Modal -->

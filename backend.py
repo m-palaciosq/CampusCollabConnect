@@ -4,6 +4,7 @@ import io
 from mysql.connector import Error
 import dbConn
 import key
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = key.makeKey()
@@ -403,25 +404,35 @@ def search():
     conn, cursor = dbConn.get_connection()
 
     query = """
-    SELECT p.postID, p.title, p.description, p.created_at, 
+    SELECT p.postID, p.title, p.description, p.created_at,
            GROUP_CONCAT(DISTINCT t.taskDescription SEPARATOR '; ') AS tasks,
            GROUP_CONCAT(DISTINCT r.requirementDesc SEPARATOR '; ') AS requirements
     FROM posts AS p
     LEFT JOIN tasks AS t ON p.postID = t.postID
     LEFT JOIN researchReqs AS r ON p.postID = r.postID
     WHERE p.title LIKE %s OR p.description LIKE %s
-    GROUP BY p.postID
+    GROUP BY p.postID, p.title, p.description, p.created_at
     ORDER BY p.created_at DESC
     """
     cursor.execute(query, (like_pattern, like_pattern))
-    job_posts = cursor.fetchall()
 
-    job_posts_dicts = [
-        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4], 'created_at': post[5]}
-        for post in job_posts
+    job_posts = [
+        {
+            'postID': post[0], 
+            'title': post[1], 
+            'description': post[2], 
+            'created_at': post[3],
+            'tasks': post[4], 
+            'requirements': post[5]
+        }
+        for post in cursor.fetchall()
     ]
 
-    return render_template('CCCSearch.html', job_posts=job_posts_dicts)
+    cursor.close()
+    conn.close()
+
+    return render_template('CCCSearch.html', job_posts=job_posts)
+
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
