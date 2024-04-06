@@ -223,8 +223,16 @@ def view_resumes(postID):
         flash('Please log in to view resumes.', 'info')
         return redirect(url_for('login'))
 
+    post_title = None
+    resumes = []
     try:
         conn, cursor = dbConn.get_connection()
+        # Fetch the post title
+        cursor.execute("SELECT title FROM posts WHERE postID = %s", (postID,))
+        post_title_row = cursor.fetchone()
+        post_title = post_title_row[0] if post_title_row else "Unknown Post"
+
+        # Fetch resumes as before
         cursor.execute("""
             SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName
             FROM resumes r
@@ -241,13 +249,13 @@ def view_resumes(postID):
     except Exception as e:
         flash("An error occurred while fetching resumes.", "error")
         print(f"An error occurred: {e}")
-        resumes = []
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
-    return render_template('view_resumes.html', resumes=resumes, postID=postID)
+    return render_template('view_resumes.html', postID=postID, postTitle=post_title, resumes=resumes)
+
 
 @app.route('/download_resume/<int:resumeID>')
 def download_resume(resumeID):
