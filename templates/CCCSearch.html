@@ -56,7 +56,6 @@
             opacity: 0.9;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -92,7 +91,6 @@
             cursor: pointer;
         }
 
-        /* Checkbox styles */
         .filter-checkboxes {
             margin: 10px 0;
         }
@@ -125,16 +123,12 @@
 
 <body>
 
-    <!-- Combined Search and Filter Form -->
-
     <form id="searchForm" action="/search" method="get">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <button type="submit" class="search-button">Search</button>
     </form>
     <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
-
-    <!-- Display search results -->
     <div id="search-results">
         {% for post in job_posts %}
         <div class="post-container" 
@@ -151,7 +145,6 @@
         {% endfor %}
     </div>
 
-    <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
@@ -187,33 +180,26 @@
             const tasks = postContainer.dataset.tasks;
             const requirements = postContainer.dataset.requirements;
 
-            // Update the modal content as before
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostTasks').innerText = tasks;
             document.getElementById('jobPostRequirements').innerText = requirements;
 
-            // Now, set the post_id value in the hidden input within the modal form
             document.getElementById('jobPostIdForResume').value = postId;
 
-            // Show the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
 
         function closeJobPostDetailsModal() {
-        // Hide the modal
         document.getElementById('jobPostDetailsModal').style.display = "none";
         }
 
-
-        // Add event listener to search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 search();
             }
         });
 
-        // Function to perform search
         function search() {
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
             const jobPosts = document.querySelectorAll('.post-container');
@@ -229,7 +215,6 @@
             });
         }
     </script>
-
 
 </body>
 
