@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Creation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap"> <!-- Google Fonts - Roboto -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> 
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -32,13 +32,13 @@
         h1 {
             text-align: center;
             margin-bottom: 20px;
-            color: #333; /* Adjust font color */
+            color: #333;
         }
         
         label {
             display: block;
             margin-bottom: 8px;
-            color: #555; /* Adjust font color */
+            color: #555; 
         }
         
         input[type="email"],
@@ -70,7 +70,7 @@
 </head>
 <body>
     <div class="card">
-        <h1><i class="fas fa-user-plus"></i> Create Your Account</h1> <!-- Added icon -->
+        <h1><i class="fas fa-user-plus"></i> Create Your Account</h1>
         <form id="accountCreationForm" action="/create_account" method="post">
             <label for="firstName">First Name:</label>
             <input type="text" id="firstName" name="firstName" required>
@@ -83,27 +83,5 @@
             <input type="submit" value="Create Account">
         </form>
     </div>
-    <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <script>
-        $(document).ready(function() {
-            $('#accountCreationForm').submit(function(event) {
-                event.preventDefault(); 
-
-                var formData = $(this).serialize();
-
-                $.ajax({
-                    type: 'POST',
-                    url: '/create_account',
-                    data: formData,
-                    success: function(response) {
-                        alert(response); 
-                    },
-                    error: function(xhr, status, error) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>

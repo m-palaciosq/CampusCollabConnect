@@ -46,7 +46,6 @@
                 <p><strong>Resume ID:</strong> {{ resume['resumeID'] }}</p>
                 <p><strong>User ID:</strong> {{ resume['userID'] }}</p>
                 <p><strong>File Type:</strong> {{ resume['fileType'] }}</p>
-                <!-- Download link unchanged -->
                 <a href="{{ url_for('download_resume', resumeID=resume['resumeID']) }}" class="btn btn-primary download-button">Download Resume</a>
             </div>
             {% endfor %}
