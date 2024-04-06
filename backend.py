@@ -390,7 +390,7 @@ def submit_resume():
     save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
 
     # Flash a success message
-    flash('Resume uploaded successfully')
+    flash('Resume uploaded successfully', 'success')
     
     # Redirect to the dashboard
     return redirect(url_for('dashboard'))
