@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, flash
 from werkzeug.exceptions import RequestEntityTooLarge
 import io
 from mysql.connector import Error
@@ -378,9 +378,13 @@ def submit_resume():
     user_id = session.get('user_id')
     post_id = request.form.get('postID')  
 
+    # Assuming this function does the job of saving the resume to the database
     save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
 
+    # Flash a success message
     flash('Resume uploaded successfully')
+    
+    # Redirect to the dashboard
     return redirect(url_for('dashboard'))
 
 def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
