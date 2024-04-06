@@ -11,6 +11,18 @@
             margin: 20px;
         }
 
+        .custom-alert {
+            display: none; /* Initially hidden */
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: green;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            z-index: 1001; /* Make sure it appears above other content */
+        }
+
         .search-container,
         .navigation-container,
         .filter-form {
@@ -40,6 +52,7 @@
             text-decoration: none;
             display: inline-block;
         }
+        
 
         .search-button,
         .filter-button {
@@ -124,16 +137,18 @@
 </head>
 
 <body>
-    <!-- Flash Messages Display -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div id="flash-messages">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    <div id="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <div id="resumeUploadAlert" class="custom-alert">Resume Uploaded Successfully!</div>
+
     
        <!-- Combined Search and Filter Form -->
 
@@ -233,6 +248,16 @@
             }
         });
 
+                // Check for a specific query parameter to trigger the resume upload success message
+                window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.has('resumeUploaded') && urlParams.get('resumeUploaded') === 'true') {
+                document.getElementById('resumeUploadAlert').style.display = 'block';
+                // Optionally, remove the query param from the URL
+                history.pushState(null, '', location.href.split('?')[0]);
+            }
+        };
+
         // Function to perform search
         function search() {
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
@@ -248,6 +273,8 @@
                 }
             });
         }
+
+        
     </script>
 
 
