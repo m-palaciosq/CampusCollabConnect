@@ -11,6 +11,35 @@
             margin: 20px;
         }
 
+        /* Notification Styles */
+        #notification {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 20px; /* Show at the top */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 10px 20px;
+            color: white;
+            background-color: green;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+
+
         .search-container,
         .navigation-container,
         .filter-form {
@@ -40,6 +69,7 @@
             text-decoration: none;
             display: inline-block;
         }
+        
 
         .search-button,
         .filter-button {
@@ -56,6 +86,7 @@
             opacity: 0.9;
         }
 
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -91,6 +122,7 @@
             cursor: pointer;
         }
 
+        /* Checkbox styles */
         .filter-checkboxes {
             margin: 10px 0;
         }
@@ -122,29 +154,43 @@
 </head>
 
 <body>
-
+    <!-- Flash Messages Display -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    
+    <!-- Combined Search and Filter Form -->
     <form id="searchForm" action="/search" method="get">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <button type="submit" class="search-button">Search</button>
     </form>
     <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
-    <div id="search-results">
-        {% for post in job_posts %}
-        <div class="post-container" 
-        data-post-id="{{post.postID}}" 
-        data-tasks="{{ post.tasks }}" 
-        data-requirements="{{ post.requirements }}">
-            <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
-                {{ post.title }}
-            </h4>
-            <p class="post-description">{{ post.description }}</p>
-            <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
-            <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
-        </div>
-        {% endfor %}
-    </div>
 
+<div id="search-results">
+    {% for post in job_posts %}
+    <div class="post-container" 
+    data-post-id="{{ post.postID }}" 
+    data-tasks="{{ post.tasks }}" 
+    data-requirements="{{ post.requirements }}">
+        <h4 class="post-title" onclick="openJobPostDetailsModal(this)">
+            {{ post.title }}
+        </h4>
+        <p class="post-description">{{ post.description }}</p>
+        <p class="post-tasks"><strong>Tasks:</strong> {{ post.tasks }}</p>
+        <p class="post-requirements"><strong>Research Requirements:</strong> {{ post.requirements }}</p>
+        <p class="post-created-at"><strong>Posted on:</strong> {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+    <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
@@ -169,44 +215,93 @@
         </div>
     </div>
 
+        <!-- Display Flask flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="messages-container">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
 
-    <script>
+      <script>
+        // Function to open the job post details in a modal
         function openJobPostDetailsModal(element) {
+            // Get data from the clicked post container
             const postContainer = element.closest('.post-container');
-            const postId = postContainer.getAttribute('data-post-id'); 
-
+            const postId = postContainer.getAttribute('data-post-id');
             const title = element.innerText;
             const description = postContainer.querySelector('.post-description').textContent;
             const tasks = postContainer.dataset.tasks;
             const requirements = postContainer.dataset.requirements;
-
+    
+            // Update modal content with the job post details
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostTasks').innerText = tasks;
             document.getElementById('jobPostRequirements').innerText = requirements;
-
+    
+            // Set the value for the hidden postID input in the resume submission form
             document.getElementById('jobPostIdForResume').value = postId;
-
+    
+            // Display the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
-
+    
+        // Function to close the job post details modal
         function closeJobPostDetailsModal() {
-        document.getElementById('jobPostDetailsModal').style.display = "none";
+            document.getElementById('jobPostDetailsModal').style.display = "none";
+        }
+    
+        // Function to show notification
+        function showNotification() {
+            var notification = document.getElementById('notification');
+            notification.style.display = 'block';
+            setTimeout(function(){
+                notification.style.display = 'none';
+            }, 5000);
         }
 
+        // Add event listener to the form submit action
+        document.getElementById('resumeSubmissionForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submit action
+            // On successful AJAX call:
+            showNotification(); // Call showNotification to display the notification
+            // Redirect after a delay
+            setTimeout(function(){
+                window.location.href = "{{ url_for('dashboard') }}";
+            });
+        });
+
+        document.getElementById('resumeSubmissionForm').addEventListener('submit', function(e) {
+             e.preventDefault();
+        //     AJAX request to server with form data
+        //     On success:
+            showNotification('Resume uploaded successfully');
+        });
+
+    
+        // Add a keypress event listener to the search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
+                // Prevent the form from being submitted on 'Enter' keypress
+                event.preventDefault();
+                // Trigger the search functionality
                 search();
             }
         });
-
+    
+        // Function to perform the search
         function search() {
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
             const jobPosts = document.querySelectorAll('.post-container');
-
+    
             jobPosts.forEach(function (postContainer) {
                 const postTitle = postContainer.querySelector('.post-title').textContent.toLowerCase();
-
+    
+                // Display only the posts that match the search term
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = 'block';
                 } else {
@@ -215,6 +310,9 @@
             });
         }
     </script>
+        <div id="notification">Resume uploaded successfully!</div>
+
+
 
 </body>
 

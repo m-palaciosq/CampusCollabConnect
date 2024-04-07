@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, flash, jsonify
 from werkzeug.exceptions import RequestEntityTooLarge
 import io
 from mysql.connector import Error
 import dbConn
 import key
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = key.makeKey()
@@ -222,8 +223,16 @@ def view_resumes(postID):
         flash('Please log in to view resumes.', 'info')
         return redirect(url_for('login'))
 
+    post_title = None
+    resumes = []
     try:
         conn, cursor = dbConn.get_connection()
+        # Fetch the post title
+        cursor.execute("SELECT title FROM posts WHERE postID = %s", (postID,))
+        post_title_row = cursor.fetchone()
+        post_title = post_title_row[0] if post_title_row else "Unknown Post"
+
+        # Fetch resumes as before
         cursor.execute("""
             SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName
             FROM resumes r
@@ -240,13 +249,13 @@ def view_resumes(postID):
     except Exception as e:
         flash("An error occurred while fetching resumes.", "error")
         print(f"An error occurred: {e}")
-        resumes = []
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
-    return render_template('view_resumes.html', resumes=resumes, postID=postID)
+    return render_template('view_resumes.html', postID=postID, postTitle=post_title, resumes=resumes)
+
 
 @app.route('/download_resume/<int:resumeID>')
 def download_resume(resumeID):
@@ -377,9 +386,13 @@ def submit_resume():
     user_id = session.get('user_id')
     post_id = request.form.get('postID')  
 
+    # Assuming this function does the job of saving the resume to the database
     save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
 
-    flash('Resume uploaded successfully')
+    # Flash a success message
+    jsonify({'message': 'Resume uploaded successfully', 'category': 'success'})
+    
+    # Redirect to the dashboard
     return redirect(url_for('dashboard'))
 
 def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
@@ -403,29 +416,35 @@ def search():
     conn, cursor = dbConn.get_connection()
 
     query = """
-    SELECT p.postID, p.title, p.description,
+    SELECT p.postID, p.title, p.description, p.created_at,
            GROUP_CONCAT(DISTINCT t.taskDescription SEPARATOR '; ') AS tasks,
            GROUP_CONCAT(DISTINCT r.requirementDesc SEPARATOR '; ') AS requirements
     FROM posts AS p
     LEFT JOIN tasks AS t ON p.postID = t.postID
     LEFT JOIN researchReqs AS r ON p.postID = r.postID
     WHERE p.title LIKE %s OR p.description LIKE %s
-    GROUP BY p.postID
-    ORDER BY p.postID
+    GROUP BY p.postID, p.title, p.description, p.created_at
+    ORDER BY p.created_at DESC
     """
     cursor.execute(query, (like_pattern, like_pattern))
 
-    job_posts = cursor.fetchall()
+    job_posts = [
+        {
+            'postID': post[0], 
+            'title': post[1], 
+            'description': post[2], 
+            'created_at': post[3],
+            'tasks': post[4], 
+            'requirements': post[5]
+        }
+        for post in cursor.fetchall()
+    ]
 
     cursor.close()
     conn.close()
 
-    job_posts_dicts = [
-        {'postID': post[0], 'title': post[1], 'description': post[2], 'tasks': post[3], 'requirements': post[4]}
-        for post in job_posts
-    ]
+    return render_template('CCCSearch.html', job_posts=job_posts)
 
-    return render_template('CCCSearch.html', job_posts=job_posts_dicts)
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
