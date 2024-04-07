@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, flash, jsonify
 from werkzeug.exceptions import RequestEntityTooLarge
 import io
 from mysql.connector import Error
@@ -390,7 +390,7 @@ def submit_resume():
     save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
 
     # Flash a success message
-    flash('Resume uploaded successfully', 'success')
+    return jsonify({'message': 'Resume uploaded successfully', 'category': 'success'})
     
     # Redirect to the dashboard
     return redirect(url_for('dashboard'))
