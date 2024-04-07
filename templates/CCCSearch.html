@@ -212,60 +212,64 @@
         {% endif %}
       {% endwith %}
 
-    <script>
+      <script>
+        // Function to open the job post details in a modal
         function openJobPostDetailsModal(element) {
+            // Get data from the clicked post container
             const postContainer = element.closest('.post-container');
-            const postId = postContainer.getAttribute('data-post-id'); 
-
+            const postId = postContainer.getAttribute('data-post-id');
             const title = element.innerText;
             const description = postContainer.querySelector('.post-description').textContent;
             const tasks = postContainer.dataset.tasks;
             const requirements = postContainer.dataset.requirements;
-
-            // Update the modal content as before
+    
+            // Update modal content with the job post details
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostTasks').innerText = tasks;
             document.getElementById('jobPostRequirements').innerText = requirements;
-
-            // Now, set the post_id value in the hidden input within the modal form
+    
+            // Set the value for the hidden postID input in the resume submission form
             document.getElementById('jobPostIdForResume').value = postId;
-
-            // Show the modal
+    
+            // Display the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
-
+    
+        // Function to close the job post details modal
         function closeJobPostDetailsModal() {
-        // Hide the modal
-        document.getElementById('jobPostDetailsModal').style.display = "none";
+            document.getElementById('jobPostDetailsModal').style.display = "none";
         }
-
-
-        // Add event listener to search input field
+    
+        // Auto-dismiss flash messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const flashMessages = document.getElementById('flash-messages');
+            if (flashMessages) {
+                setTimeout(() => {
+                    flashMessages.style.display = 'none';
+                }, 5000);
+            }
+        });
+    
+        // Add a keypress event listener to the search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
+                // Prevent the form from being submitted on 'Enter' keypress
+                event.preventDefault();
+                // Trigger the search functionality
                 search();
             }
         });
-
-                // Check for a specific query parameter to trigger the resume upload success message
-                window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if(urlParams.has('resumeUploaded') && urlParams.get('resumeUploaded') === 'true') {
-                document.getElementById('resumeUploadAlert').style.display = 'block';
-                // Optionally, remove the query param from the URL
-                history.pushState(null, '', location.href.split('?')[0]);
-            }
-        };
-
-        // Function to perform search
+    
+        // Function to perform the search
         function search() {
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
             const jobPosts = document.querySelectorAll('.post-container');
-
+    
             jobPosts.forEach(function (postContainer) {
                 const postTitle = postContainer.querySelector('.post-title').textContent.toLowerCase();
-
+    
+                // Display only the posts that match the search term
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = 'block';
                 } else {
@@ -273,9 +277,8 @@
                 }
             });
         }
-
-        
     </script>
+    
 
 
 </body>
