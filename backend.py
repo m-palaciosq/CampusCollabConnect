@@ -363,37 +363,37 @@ def sign_out():
 @app.route('/submit_resume', methods=['POST'])
 def submit_resume():
     if 'resumeFile' not in request.files:
-        flash('No file part')
+        flash('No file part', 'error')
         return redirect(request.url)
     
     file = request.files['resumeFile']
     if file.filename == '':
-        flash('No selected file')
+        flash('No selected file', 'error')
         return redirect(request.url)
     
     file_mimetype = file.mimetype
-
     mime_type_to_enum = {
         'application/pdf': 'pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
     }
-
     file_type_enum = mime_type_to_enum.get(file_mimetype, None)
+    
     if file_type_enum is None:
-        flash("Unsupported file type. Please upload a PDF or DOCX file.")
+        flash("Unsupported file type. Please upload a PDF or DOCX file.", 'error')
         return redirect(request.url)
 
     user_id = session.get('user_id')
-    post_id = request.form.get('postID')  
+    post_id = request.form.get('postID')
 
-    # Assuming this function does the job of saving the resume to the database
-    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
+    try:
+        save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
+        flash('Resume uploaded successfully', 'success')
+    except Exception as e:
+        # Log the exception e
+        flash('An error occurred while uploading the resume.', 'error')
 
-    # Flash a success message
-    jsonify({'message': 'Resume uploaded successfully', 'category': 'success'})
-    
-    # Redirect to the dashboard
     return redirect(url_for('dashboard'))
+
 
 def save_resume_to_database(user_id, post_id, file_content, file_type_enum):
     try:
