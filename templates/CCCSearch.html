@@ -268,13 +268,12 @@
         // Add event listener to the form submit action
         document.getElementById('resumeSubmissionForm').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the default form submit action
-            // Assume AJAX call here to submit the form data
             // On successful AJAX call:
             showNotification(); // Call showNotification to display the notification
             // Redirect after a delay
             setTimeout(function(){
                 window.location.href = "{{ url_for('dashboard') }}";
-            }, 1000);
+            });
         });
 
         document.getElementById('resumeSubmissionForm').addEventListener('submit', function(e) {
