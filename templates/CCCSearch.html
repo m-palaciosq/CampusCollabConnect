@@ -11,26 +11,33 @@
             margin: 20px;
         }
 
-/* Notification Styles */
-#notification {
-    display: none; /* Hidden by default */
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    padding: 10px 20px;
-    color: white;
-    background-color: green;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    animation: fadeInOut 5s;
-}
+        /* Notification Styles */
+        #notification {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 20px; /* Show at the top */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 10px 20px;
+            color: white;
+            background-color: green;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-@keyframes fadeInOut {
-    0%, 100% { opacity: 0; }
-    10%, 90% { opacity: 1; }
-}
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
 
 
         .search-container,
@@ -147,8 +154,16 @@
 </head>
 
 <body>
-    <!-- Place your notification div here -->
-    <div id="notification"></div>
+    <!-- Flash Messages Display -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     
     <!-- Combined Search and Filter Form -->
     <form id="searchForm" action="/search" method="get">
@@ -241,17 +256,28 @@
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
     
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message; // Set the text of the notification
-            notification.style.display = 'block'; // Show the notification
-            // Hide the notification after 5 seconds
-            setTimeout(() => {
+        // Function to show notification
+        function showNotification() {
+            var notification = document.getElementById('notification');
+            notification.style.display = 'block';
+            setTimeout(function(){
                 notification.style.display = 'none';
             }, 5000);
         }
 
-                document.getElementById('resumeSubmissionForm').addEventListener('submit', function(e) {
+        // Add event listener to the form submit action
+        document.getElementById('resumeSubmissionForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submit action
+            // Assume AJAX call here to submit the form data
+            // On successful AJAX call:
+            showNotification(); // Call showNotification to display the notification
+            // Redirect after a delay
+            setTimeout(function(){
+                window.location.href = "{{ url_for('dashboard') }}";
+            }, 5000);
+        });
+
+        document.getElementById('resumeSubmissionForm').addEventListener('submit', function(e) {
              e.preventDefault();
         //     AJAX request to server with form data
         //     On success:
@@ -286,7 +312,8 @@
             });
         }
     </script>
-    
+        <div id="notification">Resume uploaded successfully!</div>
+
 
 
 </body>
