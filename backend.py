@@ -393,7 +393,6 @@ def submit_resume():
     # This time, use file_type_enum instead of content_type for the database insertion
     save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
 
-    flash('Resume uploaded successfully')
     return redirect(url_for('dashboard'))
 
 
