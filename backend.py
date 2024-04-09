@@ -217,36 +217,47 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/delete_post/<int:post_id>', methods=['GET'])
+
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
     user_id = session.get('user_id')
-
     if not user_id:
+        # User is not logged in, redirect to login page with an error message.
+        flash("You need to log in to delete posts.", "error")
         return redirect(url_for('login'))
 
     try:
         conn, cursor = dbConn.get_connection()
-
+        
+        # Check if the current user is the owner of the post
         cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
+            # User is not the owner of the post, flash an error message.
+            flash("You are not authorized to delete this post.", "error")
             return redirect(url_for('manage_posts'))
-
+        
+        # Delete related entries first due to foreign key constraints.
         cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
         cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
+        cursor.execute("DELETE FROM resumes WHERE postID = %s", (post_id,))  # Assuming there is a resumes table related to the post.
+        
+        # Now, delete the post itself.
         cursor.execute("DELETE FROM posts WHERE postID = %s", (post_id,))
         conn.commit()
         
     except Error as e:
+        # If an error occurs, rollback the transaction and flash an error message.
         conn.rollback()
-        print(f"An error occurred: {e}")  # You can handle logging as per your application's logging policy
+        print(f"An error occurred: {e}")
     finally:
+        # Close the cursor and connection.
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-    
-    return redirect(url_for('manage_posts'))
 
+    # Redirect back to the posts management page.
+    return redirect(url_for('manage_posts'))
 
 
 
