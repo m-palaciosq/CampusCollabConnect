@@ -226,27 +226,33 @@ def delete_post(post_id):
     
     try:
         conn, cursor = dbConn.get_connection()
-        # Ensure the current user is the owner of the post
+
+        # First, check if the current user is the owner of the post
         cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             flash("You are not authorized to delete this post.", "error")
             return redirect(url_for('manage_posts'))
-        
-        # Delete the post
+
+        # Delete related entries in other tables
+        tables_to_clear = ['tasks', 'researchreqs', 'resumes']
+        for table in tables_to_clear:
+            cursor.execute(f"DELETE FROM {table} WHERE postID = %s", (post_id,))
+
+        # Now, delete the post itself
         cursor.execute("DELETE FROM posts WHERE postID = %s", (post_id,))
         conn.commit()
         flash("Post deleted successfully.", "success")
-    except Exception as e:
-        conn.rollback()
-        flash("An error occurred while deleting the post.", "error")
-        print(f"An error occurred: {e}")
+    except Error as e:
+        conn.rollback()  # Rollback in case of any error
+        flash(f"An error occurred while deleting the post: {e}", "error")
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
+    
     return redirect(url_for('manage_posts'))
+
 
 
 @app.route('/view_resumes/<int:postID>')
