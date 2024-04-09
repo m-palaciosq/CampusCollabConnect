@@ -256,16 +256,6 @@
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
 
-        // Function to show notification
-        function showNotification() {
-            var notification = document.getElementById('notification');
-            notification.style.display = 'block';
-            setTimeout(function () {
-                notification.style.display = 'none';
-            }, 5000);
-        }
-
-
         // Add a keypress event listener to the search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
