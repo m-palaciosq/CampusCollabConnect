@@ -49,8 +49,9 @@
             <p>Posted by: {{ post['username'] }}</p>
             <a href="{{ url_for('edit_post', post_id=post['postID']) }}" class="btn btn-primary edit-button">Edit</a>
             <a href="{{ url_for('view_resumes', postID=post['postID']) }}" class="btn btn-info view-resumes-button">View Resumes</a>
-            <!-- Add a Delete button -->
-            <a href="{{ url_for('delete_post', post_id=post['postID']) }}" class="btn btn-danger delete-button" onclick="return confirm('Are you sure you want to delete this post?');">Delete</a>
+            <form action="{{ url_for('delete_post', post_id=post['postID']) }}" method="post" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
         </div>
         {% endfor %}
     </div>

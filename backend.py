@@ -217,7 +217,7 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/delete_post/<int:post_id>', methods=['GET'])
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
     user_id = session.get('user_id')
     if not user_id:
@@ -226,26 +226,26 @@ def delete_post(post_id):
     
     try:
         conn, cursor = dbConn.get_connection()
-        # First, check if the current user is the owner of the post
+        # Ensure the current user is the owner of the post
         cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             flash("You are not authorized to delete this post.", "error")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('manage_posts'))
         
-        # If the user is the owner, delete the post
+        # Delete the post
         cursor.execute("DELETE FROM posts WHERE postID = %s", (post_id,))
         conn.commit()
         flash("Post deleted successfully.", "success")
-    except Error as e:
-        conn.rollback()  # Rollback in case of any error
+    except Exception as e:
+        conn.rollback()
         flash("An error occurred while deleting the post.", "error")
         print(f"An error occurred: {e}")
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-    
+
     return redirect(url_for('manage_posts'))
 
 
