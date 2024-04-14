@@ -256,6 +256,18 @@ def delete_post(post_id):
 
     return redirect(url_for('manage_posts'))
 
+@app.route('/inbox')
+def inbox():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in to view your inbox.", "info")
+        return redirect(url_for('login'))
+    
+    messages = dbConn.fetch_user_messages(user_id)
+    return render_template('inbox.html', messages=messages)
+
+
+
 @app.route('/send_message', methods=['POST'])
 def send_message():
     if 'user_id' not in session:
