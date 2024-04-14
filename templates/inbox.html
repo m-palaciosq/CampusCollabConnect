@@ -2,41 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inbox</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <style>
-        .message-preview {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        .message-preview:hover {
-            background-color: #e9ecef;
-        }
-        .no-messages {
-            text-align: center;
-            margin-top: 50px;
-        }
-    </style>
+    <link rel="stylesheet" href="//path_to_your_css/bootstrap.css">
 </head>
-<body class="container">
-    <h1 class="mt-5">Inbox</h1>
-    <div id="messages-container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="message-preview">
-                    <h4>{{ message.sender_name }} <small>{{ message.sent_time }}</small></h4>
-                    <p>{{ message.subject }}</p>
-                    <a href="{{ url_for('view_message', message_id=message.id) }}" class="btn btn-primary">View Message</a>
+<body>
+    <h1>Inbox</h1>
+    <!-- Button to trigger modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#composeMessageModal">
+        New Message
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="composeMessageModal" tabindex="-1" role="dialog" aria-labelledby="composeMessageModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="composeMessageModalLabel">Compose New Message</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            {% endfor %}
-        {% else %}
-            <p class="no-messages">No messages to display.</p>
-        {% endif %}
+                <form action="{{ url_for('new_message') }}" method="post">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="receiver_id">Recipient's User ID:</label>
+                            <input type="text" class="form-control" id="receiver_id" name="receiver_id" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message_content">Message:</label>
+                            <textarea class="form-control" id="message_content" name="message_content" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+
+    {% for message in messages %}
+    <div>
+        <p><strong>From:</strong> {{ message.sender_id }}</p>
+        <p><strong>Message:</strong> {{ message.message_content }}</p>
+        <p><strong>Sent:</strong> {{ message.sent_time }}</p>
+    </div>
+    {% endfor %}
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.12/dist/umd/popper.min.js"></script>
