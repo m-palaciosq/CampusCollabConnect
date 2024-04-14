@@ -345,6 +345,25 @@ def read_message(message_id):
     finally:
         cursor.close()
         conn.close()
+        
+@app.route('/new_message', methods=['POST'])
+def new_message():
+    sender_id = session.get('user_id')
+    receiver_id = request.form['receiver_id']
+    message_content = request.form['message_content']
+    
+    if not sender_id:
+        flash("Please log in to send messages.", "info")
+        return redirect(url_for('login'))
+
+    # Assume save_message() function exists and saves data to the DB
+    success = dbConn.save_message(sender_id, receiver_id, message_content)
+    if success:
+        flash("Message sent successfully.", "success")
+    else:
+        flash("Failed to send message.", "error")
+    return redirect(url_for('inbox'))
+
 
     return render_template('read_message.html', message=message)
 
