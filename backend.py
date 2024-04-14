@@ -256,17 +256,27 @@ def delete_post(post_id):
 
     return redirect(url_for('manage_posts'))
 
+
 @app.route('/inbox')
 def inbox():
-    user_id = session.get('user_id')
-    if not user_id:
-        flash("Please log in to view your inbox.", "info")
+    if 'user_id' not in session:
+        flash('You must be logged in to view your inbox.')
         return redirect(url_for('login'))
-    
-    messages = dbConn.fetch_user_messages(user_id)
+
+    try:
+        conn, cursor = dbConn.get_connection()
+        query = "SELECT * FROM messages WHERE receiver_id = %s ORDER BY created_at DESC"
+        cursor.execute(query, (session['user_id'],))
+        messages = cursor.fetchall()
+    except Error as e:
+        flash('An error occurred while fetching messages.')
+        print(e)
+        messages = []
+    finally:
+        cursor.close()
+        conn.close()
+
     return render_template('inbox.html', messages=messages)
-
-
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
@@ -297,27 +307,6 @@ def send_message():
 
     return redirect(url_for('inbox'))
 
-@app.route('/inbox')
-def inbox():
-    if 'user_id' not in session:
-        flash('You must be logged in to view your inbox.')
-        return redirect(url_for('login'))
-
-    try:
-        conn, cursor = dbConn.get_connection()
-        query = "SELECT * FROM messages WHERE receiver_id = %s ORDER BY created_at DESC"
-        cursor.execute(query, (session['user_id'],))
-        messages = cursor.fetchall()
-    except Error as e:
-        flash('An error occurred while fetching messages.')
-        print(e)
-        messages = []
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template('inbox.html', messages=messages)
-
 @app.route('/message/<int:message_id>')
 def read_message(message_id):
     if 'user_id' not in session:
@@ -346,6 +335,9 @@ def read_message(message_id):
         cursor.close()
         conn.close()
         
+    return render_template('read_message.html', message=message)
+
+        
 @app.route('/new_message', methods=['POST'])
 def new_message():
     sender_id = session.get('user_id')
@@ -365,7 +357,6 @@ def new_message():
     return redirect(url_for('inbox'))
 
 
-    return render_template('read_message.html', message=message)
 
 @app.route('/delete_message/<int:message_id>', methods=['POST'])
 def delete_message(message_id):
