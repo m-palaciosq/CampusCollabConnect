@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        .message-preview {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .message-preview:hover {
+            background-color: #e9ecef;
+        }
+        .no-messages {
+            text-align: center;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body class="container">
+    <h1 class="mt-5">Inbox</h1>
+    <div id="messages-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-preview">
+                    <h4>{{ message.sender_name }} <small>{{ message.sent_time }}</small></h4>
+                    <p>{{ message.subject }}</p>
+                    <a href="{{ url_for('view_message', message_id=message.id) }}" class="btn btn-primary">View Message</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-messages">No messages to display.</p>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.12/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
