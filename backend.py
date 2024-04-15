@@ -278,6 +278,28 @@ def inbox():
 
     return render_template('inbox.html', messages=messages)
 
+def save_message(sender_id, receiver_id, subject, content):
+    conn, cursor = dbConn.get_connection()
+    if conn is None:
+        return False
+    try:
+        cursor = conn.cursor()
+        query = """
+        INSERT INTO inbox (sender_id, receiver_id, subject, content, is_read, created_at)
+        VALUES (%s, %s, %s, %s, %s, NOW())
+        """
+        # is_read is set to False by default to indicate the message has not been read.
+        cursor.execute(query, (sender_id, receiver_id, subject, content, False))
+        conn.commit()
+        return True
+    except Error as e:
+        print(f"Error occurred: {e}")
+        return False
+    finally:
+        if conn.is_connected():
+            cursor.close()
+            conn.close()
+
 @app.route('/send_message', methods=['POST'])
 def send_message():
     if 'user_id' not in session:
