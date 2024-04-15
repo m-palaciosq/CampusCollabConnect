@@ -206,17 +206,6 @@
         </div>
     </div>
 
-    <!-- Display Flask flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="messages-container">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
     <script>
         // Function to open the job post details in a modal
         function openJobPostDetailsModal(element) {
