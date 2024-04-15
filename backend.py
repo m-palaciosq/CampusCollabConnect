@@ -217,196 +217,36 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-
-@app.route('/delete_post/<int:post_id>', methods=['POST'])
+@app.route('/delete_post/<int:post_id>', methods=['GET'])
 def delete_post(post_id):
     user_id = session.get('user_id')
     if not user_id:
         flash("You need to log in to delete posts.", "error")
         return redirect(url_for('login'))
-
+    
     try:
         conn, cursor = dbConn.get_connection()
-
         # First, check if the current user is the owner of the post
         cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             flash("You are not authorized to delete this post.", "error")
-            return redirect(url_for('manage_posts'))
+            return redirect(url_for('dashboard'))
         
-        # Delete related entries first due to foreign key constraints.
-        cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
-        cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
-        cursor.execute("DELETE FROM resumes WHERE postID = %s", (post_id,))
-        
-        # Now, delete the post itself.
+        # If the user is the owner, delete the post
         cursor.execute("DELETE FROM posts WHERE postID = %s", (post_id,))
         conn.commit()
         flash("Post deleted successfully.", "success")
-        
     except Error as e:
-        conn.rollback()
+        conn.rollback()  # Rollback in case of any error
         flash("An error occurred while deleting the post.", "error")
         print(f"An error occurred: {e}")
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
-    return redirect(url_for('manage_posts'))
-
-
-@app.route('/inbox')
-def inbox():
-    if 'user_id' not in session:
-        flash('You must be logged in to view your inbox.')
-        return redirect(url_for('login'))
-
-    try:
-        conn, cursor = dbConn.get_connection()
-        query = "SELECT * FROM messages WHERE receiver_id = %s ORDER BY created_at DESC"
-        cursor.execute(query, (session['user_id'],))
-        messages = cursor.fetchall()
-    except Error as e:
-        flash('An error occurred while fetching messages.')
-        print(e)
-        messages = []
-    finally:
-        cursor.close()
-        conn.close()
-
-    return render_template('inbox.html', messages=messages)
-
-def save_message(sender_id, receiver_id, subject, content):
-    conn, cursor = dbConn.get_connection()
-    if conn is None:
-        return False
-    try:
-        cursor = conn.cursor()
-        query = """
-        INSERT INTO inbox (sender_id, receiver_id, subject, content, is_read, created_at)
-        VALUES (%s, %s, %s, %s, %s, NOW())
-        """
-        # is_read is set to False by default to indicate the message has not been read.
-        cursor.execute(query, (sender_id, receiver_id, subject, content, False))
-        conn.commit()
-        return True
-    except Error as e:
-        print(f"Error occurred: {e}")
-        return False
-    finally:
-        if conn.is_connected():
-            cursor.close()
-            conn.close()
-
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    if 'user_id' not in session:
-        flash('You must be logged in to send messages.')
-        return redirect(url_for('login'))
-
-    receiver_id = request.form.get('receiver_id')
-    subject = request.form.get('subject')
-    content = request.form.get('content')
-
-    if not receiver_id or not subject or not content:
-        flash('All fields are required.')
-        return redirect(request.referrer)
-
-    try:
-        conn, cursor = dbConn.get_connection()
-        query = "INSERT INTO messages (sender_id, receiver_id, subject, content) VALUES (%s, %s, %s, %s)"
-        cursor.execute(query, (session['user_id'], receiver_id, subject, content))
-        conn.commit()
-        flash('Message sent successfully.')
-    except Error as e:
-        flash('An error occurred while sending the message.')
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
-    return redirect(url_for('inbox'))
-
-@app.route('/message/<int:message_id>')
-def read_message(message_id):
-    if 'user_id' not in session:
-        flash('You must be logged in to read messages.')
-        return redirect(url_for('login'))
-
-    try:
-        conn, cursor = dbConn.get_connection()
-        # Fetch the message
-        cursor.execute("SELECT * FROM messages WHERE id = %s AND receiver_id = %s", (message_id, session['user_id']))
-        message = cursor.fetchone()
-
-        if message:
-            # Mark the message as read if necessary
-            if not message['is_read']:
-                cursor.execute("UPDATE messages SET is_read = TRUE WHERE id = %s", (message_id,))
-                conn.commit()
-
-        else:
-            flash('Message not found or you do not have permission to view it.')
-            return redirect(url_for('inbox'))
-    except Error as e:
-        flash('An error occurred while fetching the message.')
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-        
-    return render_template('read_message.html', message=message)
-
-        
-@app.route('/new_message', methods=['POST'])
-def new_message():
-    sender_id = session.get('user_id')
-    receiver_id = request.form['receiver_id']
-    message_content = request.form['message_content']
     
-    if not sender_id:
-        flash("Please log in to send messages.", "info")
-        return redirect(url_for('login'))
-
-    # Assume save_message() function exists and saves data to the DB
-    success = dbConn.save_message(sender_id, receiver_id, message_content)
-    if success:
-        flash("Message sent successfully.", "success")
-    else:
-        flash("Failed to send message.", "error")
-    return redirect(url_for('inbox'))
-
-
-
-@app.route('/delete_message/<int:message_id>', methods=['POST'])
-def delete_message(message_id):
-    if 'user_id' not in session:
-        flash('You must be logged in to delete messages.')
-        return redirect(url_for('login'))
-
-    try:
-        conn, cursor = dbConn.get_connection()
-        # Check if the user is the owner of the message
-        cursor.execute("SELECT receiver_id FROM messages WHERE id = %s", (message_id,))
-        result = cursor.fetchone()
-
-        if result and result['receiver_id'] == session['user_id']:
-            cursor.execute("DELETE FROM messages WHERE id = %s", (message_id,))
-            conn.commit()
-            flash('Message deleted successfully.')
-        else:
-            flash('You do not have permission to delete this message.')
-    except Error as e:
-        flash('An error occurred while deleting the message.')
-        print(e)
-    finally:
-        cursor.close()
-        conn.close()
-
-    return redirect(url_for('inbox'))
-
+    return redirect(url_for('manage_posts'))
 
 
 @app.route('/view_resumes/<int:postID>')

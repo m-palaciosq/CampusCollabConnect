@@ -74,7 +74,10 @@
 
 
         .search-button,
-        .filter-button,
+        .filter-button {
+            background-color: #007bff;
+        }
+
         .back-button {
             background-color: #007bff;
         }
@@ -138,7 +141,6 @@
         .post-title {
             cursor: pointer;
             color: #333;
-            font-size: 24px;
         }
 
         .post-title:hover {
@@ -169,8 +171,8 @@
     <form id="searchForm" action="/search" method="get">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <button type="submit" class="search-button">Search</button>
-        <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </form>
+    <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
 
     <div id="search-results">
@@ -254,6 +256,16 @@
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
 
+        // Function to show notification
+        function showNotification() {
+            var notification = document.getElementById('notification');
+            notification.style.display = 'block';
+            setTimeout(function () {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+
+
         // Add a keypress event listener to the search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
@@ -265,37 +277,37 @@
         });
 
         document.getElementById('resumeSubmissionForm').addEventListener('submit', function (e) {
-    e.preventDefault(); // Prevent the default form submission
+            e.preventDefault(); // Prevent the default form submission
 
-    var formData = new FormData(this); // 'this' refers to the form
-    var xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest for AJAX
+            var formData = new FormData(this); // 'this' refers to the form
+            var xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest for AJAX
 
-    xhr.open("POST", "/submit_resume"); // Configure the request to the submit_resume route, adjust if the URL is different
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-            // If the request is successful, show the notification
-            showNotification('Resume uploaded successfully');
-            // Optionally, redirect the user or clear the form
+            xhr.open("POST", "/submit_resume"); // Configure the request to the submit_resume route, adjust if the URL is different
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // If the request is successful, show the notification
+                    showNotification('Resume uploaded successfully');
+                    // Optionally, redirect the user or clear the form
+                    setTimeout(function () {
+                        window.location.href = "{{ url_for('dashboard') }}"; // Redirect after showing the notification
+                    }, 1000); // Adjust time as needed
+                } else {
+                    // Handle error (optional)
+                    alert("An error occurred while submitting the resume.");
+                }
+            };
+            xhr.send(formData); // Send the form data
+        });
+
+        function showNotification(message) {
+            var notification = document.getElementById('notification');
+            notification.textContent = message; // Set the text of the notification
+            notification.style.display = 'block'; // Show the notification
+            // Hide the notification after 5 seconds
             setTimeout(function () {
-                window.location.href = "{{ url_for('dashboard') }}"; // Redirect after showing the notification
-            }, 1000); // Adjust time as needed
-        } else {
-            // Handle error (optional)
-            alert("An error occurred while submitting the resume.");
+                notification.style.display = 'none';
+            }, 5000);
         }
-    };
-    xhr.send(formData); // Send the form data
-});
-
-function showNotification(message) {
-    var notification = document.getElementById('notification');
-    notification.textContent = message; // Set the text of the notification
-    notification.style.display = 'block'; // Show the notification
-    // Hide the notification after 5 seconds
-    setTimeout(function () {
-        notification.style.display = 'none';
-    }, 5000);
-}
 
 
         // Function to perform the search
