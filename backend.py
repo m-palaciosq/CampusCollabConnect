@@ -223,31 +223,37 @@ def delete_post(post_id):
     if not user_id:
         flash("You need to log in to delete posts.", "error")
         return redirect(url_for('login'))
-    
+
     try:
         conn, cursor = dbConn.get_connection()
+
         # First, check if the current user is the owner of the post
         cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             flash("You are not authorized to delete this post.", "error")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('manage_posts'))
         
-        # If the user is the owner, delete the post
+        # Delete related entries first due to foreign key constraints.
+        cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
+        cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
+        cursor.execute("DELETE FROM resumes WHERE postID = %s", (post_id,))
+        
+        # Now, delete the post itself.
         cursor.execute("DELETE FROM posts WHERE postID = %s", (post_id,))
         conn.commit()
         flash("Post deleted successfully.", "success")
+        
     except Error as e:
-        conn.rollback()  # Rollback in case of any error
+        conn.rollback()
         flash("An error occurred while deleting the post.", "error")
         print(f"An error occurred: {e}")
     finally:
-        if conn and conn.is_connected():
+        if conn.is_connected():
             cursor.close()
             conn.close()
-    
-    return redirect(url_for('manage_posts'))
 
+    return redirect(url_for('manage_posts'))
 
 @app.route('/view_resumes/<int:postID>')
 def view_resumes(postID):
