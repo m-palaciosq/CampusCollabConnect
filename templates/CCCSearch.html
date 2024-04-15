@@ -171,8 +171,8 @@
     <form id="searchForm" action="/search" method="get">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <button type="submit" class="search-button">Search</button>
+        <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </form>
-    <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
 
 
     <div id="search-results">
