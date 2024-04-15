@@ -217,7 +217,7 @@ def manage_posts():
 
     return render_template('mPostSelection.html', posts=posts_list)
 
-@app.route('/delete_post/<int:post_id>', methods=['GET'])
+@app.route('/delete_post/<int:post_id>', methods=['POST'])
 def delete_post(post_id):
     user_id = session.get('user_id')
     if not user_id:
