@@ -558,7 +558,7 @@ def delete_message(message_id):
         # First, verify the message belongs to the user
         cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
         message = cursor.fetchone()
-        if message and message['receiver_id'] == user_id:
+        if message and message[0] == user_id:  # Access receiver_id using index
             # If the message belongs to the user, delete it
             cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
             conn.commit()
