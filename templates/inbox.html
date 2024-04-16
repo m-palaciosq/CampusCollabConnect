@@ -171,6 +171,23 @@
                     console.error('Error:', error);
                 });
         });
+
+        function confirmDelete(messageId, event) {
+            event.stopPropagation(); // Prevent triggering the click event of the parent
+            if (confirm("Are you sure you want to delete this message?")) {
+                // Send AJAX request to delete the message
+                fetch('/delete_message/' + messageId, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Message deleted successfully.');
+                            location.reload(); // Reload the page to update the list
+                        } else {
+                            alert('Failed to delete the message.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
     </script>
 </body>
 
