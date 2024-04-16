@@ -553,7 +553,7 @@ def delete_message(message_id):
         return jsonify({'error': 'Unauthorized'}), 401
 
     try:
-        user_id = session['userID']
+        user_id = session['user_id']
         conn, cursor = dbConn.get_connection()
         # First, verify the message belongs to the user
         cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
