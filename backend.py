@@ -484,6 +484,58 @@ def search():
 
     return render_template('CCCSearch.html', job_posts=job_posts)
 
+@app.route('/inbox')
+def inbox():
+    if 'user_id' not in session:
+        flash('Please log in to view your inbox.', 'info')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT * FROM messages WHERE receiver_id = %s ORDER BY created_at DESC", (user_id,))
+        messages = cursor.fetchall()
+    except Exception as e:
+        flash('An error occurred while fetching messages.', 'error')
+        print(e)
+        messages = []
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return render_template('inbox.html', messages=messages)
+
+@app.route('/api/send_message', methods=['POST'])
+def send_message():
+    if 'user_id' not in session:
+        return jsonify({'error': 'You must be logged in to send messages.'}), 401
+
+    data = request.get_json()
+    receiver_id = data.get('receiver_id')
+    subject = data.get('subject')
+    content = data.get('content')
+
+    if not receiver_id or not subject or not content:
+        return jsonify({'error': 'All fields are required.'}), 400
+
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("INSERT INTO messages (sender_id, receiver_id, subject, content) VALUES (%s, %s, %s, %s)",
+                       (session['user_id'], receiver_id, subject, content))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        return jsonify({'error': 'Failed to send message.'}), 500
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return jsonify({'success': 'Message sent successfully.'})
+
+
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
