@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inbox</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Inbox</h1>
+        <button class="btn btn-primary" onclick="openNewMessageModal()">Send New Message</button>
+        <div class="list-group mt-3">
+            {% for message in messages %}
+            <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_id }}', '{{ message.content }}')">
+                <div><strong>From:</strong> {{ message.sender_id }} | <strong>Subject:</strong> {{ message.subject }}</div>
+                <p>{{ message.content | truncate(100) }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Modal for Reading Messages -->
+    <div class="modal" id="readMessageModal" tabindex="-1" style="display:none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Read Message</h5>
+                    <button type="button" class="btn-close" onclick="closeReadMessageModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>From:</strong> <span id="messageFrom"></span></p>
+                    <p><strong>Subject:</strong> <span id="messageSubject"></span></p>
+                    <p id="messageContent"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Sending Messages -->
+    <div class="modal" id="newMessageModal" tabindex="-1" style="display:none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">New Message</h5>
+                    <button type="button" class="btn-close" onclick="closeNewMessageModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendMessageForm">
+                        <div class="mb-3">
+                            <label for="receiverId" class="form-label">Receiver ID</label>
+                            <input type="text" class="form-control" id="receiverId" name="receiver_id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="messageSubject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="messageSubjectInput" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="messageContent" class="form-label">Message</label>
+                            <textarea class="form-control" id="messageContentInput" name="content" rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+    <script>
+        function openReadMessageModal(messageId, subject, from, content) {
+            document.getElementById('messageFrom').textContent = from;
+            document.getElementById('messageSubject').textContent = subject;
+            document.getElementById('messageContent').textContent = content;
+            document.getElementById('readMessageModal').style.display = 'block';
+        }
+
+        function closeReadMessageModal() {
+            document.getElementById('readMessageModal').style.display = 'none';
+        }
+
+        function openNewMessageModal() {
+            document.getElementById('newMessageModal').style.display = 'block';
+        }
+
+        function closeNewMessageModal() {
+            document.getElementById('newMessageModal').style.display = 'none';
+        }
+
+        document.getElementById('sendMessageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const receiverId = document.getElementById('receiverId').value;
+            const subject = document.getElementById('messageSubjectInput').value;
+            const content = document.getElementById('messageContentInput').value;
+            
+            // Perform AJAX request to send the message
+            // Assume the backend route /api/send_message is set up to handle POST requests
+            fetch('/api/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ receiver_id: receiverId, subject: subject, content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Message sent successfully');
+                closeNewMessageModal();
+            })
+            .catch(error => {
+                alert('Error sending message');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
