@@ -493,24 +493,30 @@ def inbox():
     
     try:
         conn, cursor = dbConn.get_connection()
-        cursor.execute("""
-        SELECT m.message_id, m.subject, m.content, u.firstName, u.lastName
+        query = """
+        SELECT m.message_id, m.subject, m.content, u.firstName as sender_first_name, u.lastName as sender_last_name
         FROM messages m
         JOIN users u ON m.sender_id = u.userID
         WHERE m.receiver_id = %s
         ORDER BY m.created_at DESC
-        """, (user_id,))
-        messages = cursor.fetchall()
+        """
+        cursor.execute(query, (user_id,))
+        messages = [{
+            'message_id': row[0],
+            'subject': row[1],
+            'content': row[2],
+            'sender_name': f"{row[3]} {row[4]}"
+        } for row in cursor.fetchall()]
     except Error as e:
         flash("An error occurred while fetching messages.", "error")
         print(e)
         messages = []
     finally:
-        cursor.close()
-        conn.close()
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
     return render_template('inbox.html', messages=messages)
-
 
 @app.route('/api/send_message', methods=['POST'])
 def send_message():
