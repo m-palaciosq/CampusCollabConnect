@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, flash, jsonify
 from werkzeug.exceptions import RequestEntityTooLarge
 import io
 from mysql.connector import Error
@@ -227,16 +227,19 @@ def delete_post(post_id):
     try:
         conn, cursor = dbConn.get_connection()
 
+        # First, check if the current user is the owner of the post
         cursor.execute("SELECT userID FROM posts WHERE postID = %s", (post_id,))
         result = cursor.fetchone()
         if not result or result[0] != user_id:
             flash("You are not authorized to delete this post.", "error")
             return redirect(url_for('manage_posts'))
         
+        # Delete related entries first due to foreign key constraints.
         cursor.execute("DELETE FROM tasks WHERE postID = %s", (post_id,))
         cursor.execute("DELETE FROM researchReqs WHERE postID = %s", (post_id,))
         cursor.execute("DELETE FROM resumes WHERE postID = %s", (post_id,))
         
+        # Now, delete the post itself.
         cursor.execute("DELETE FROM posts WHERE postID = %s", (post_id,))
         conn.commit()
         flash("Post deleted successfully.", "success")
@@ -262,10 +265,12 @@ def view_resumes(postID):
     resumes = []
     try:
         conn, cursor = dbConn.get_connection()
+        # Fetch the post title
         cursor.execute("SELECT title FROM posts WHERE postID = %s", (postID,))
         post_title_row = cursor.fetchone()
         post_title = post_title_row[0] if post_title_row else "Unknown Post"
 
+        # Fetch resumes as before
         cursor.execute("""
             SELECT r.resumeID, r.userID, r.fileType, u.firstName, u.lastName
             FROM resumes r
@@ -288,6 +293,7 @@ def view_resumes(postID):
             conn.close()
 
     return render_template('view_resumes.html', postID=postID, postTitle=post_title, resumes=resumes)
+
 
 @app.route('/download_resume/<int:resumeID>')
 def download_resume(resumeID):
@@ -403,11 +409,14 @@ def submit_resume():
         flash('No selected file')
         return redirect(request.url)
     
+    # Correctly identify the MIME type of the uploaded file
     file_mimetype = file.mimetype
 
+    # Map the MIME type to your ENUM values and validate
     mime_type_to_enum = {
         'application/pdf': 'pdf',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        # Add more mappings as necessary
     }
 
     file_type_enum = mime_type_to_enum.get(file_mimetype, None)
@@ -418,7 +427,9 @@ def submit_resume():
     user_id = session.get('user_id')
     post_id = request.form.get('postID')  
 
-    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)
+    # Proceed with saving the resume
+    # This time, use file_type_enum instead of content_type for the database insertion
+    save_resume_to_database(user_id, post_id, file.read(), file_type_enum)  # file.read() is here as an example; consider efficiency for large files
 
     return redirect(url_for('dashboard'))
 
@@ -472,6 +483,96 @@ def search():
     conn.close()
 
     return render_template('CCCSearch.html', job_posts=job_posts)
+
+@app.route('/inbox')
+def inbox():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in to view your inbox.", "info")
+        return redirect(url_for('login'))
+    
+    try:
+        conn, cursor = dbConn.get_connection()
+        query = """
+        SELECT m.message_id, m.subject, m.content, u.firstName as sender_first_name, u.lastName as sender_last_name
+        FROM messages m
+        JOIN users u ON m.sender_id = u.userID
+        WHERE m.receiver_id = %s
+        ORDER BY m.created_at DESC
+        """
+        cursor.execute(query, (user_id,))
+        messages = [{
+            'message_id': row[0],
+            'subject': row[1],
+            'content': row[2],
+            'sender_name': f"{row[3]} {row[4]}"
+        } for row in cursor.fetchall()]
+    except Error as e:
+        flash("An error occurred while fetching messages.", "error")
+        print(e)
+        messages = []
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return render_template('inbox.html', messages=messages)
+
+@app.route('/api/send_message', methods=['POST'])
+def send_message():
+    if 'user_id' not in session:
+        return jsonify({'error': 'You must be logged in to send messages.'}), 401
+
+    data = request.get_json()
+    receiver_id = data.get('receiver_id')
+    subject = data.get('subject')
+    content = data.get('content')
+
+    if not receiver_id or not subject or not content:
+        return jsonify({'error': 'All fields are required.'}), 400
+
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("INSERT INTO messages (sender_id, receiver_id, subject, content) VALUES (%s, %s, %s, %s)",
+                       (session['user_id'], receiver_id, subject, content))
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        return jsonify({'error': 'Failed to send message.'}), 500
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+    return jsonify({'success': 'Message sent successfully.'})
+
+@app.route('/delete_message/<int:message_id>', methods=['POST'])
+def delete_message(message_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        user_id = session['user_id']
+        conn, cursor = dbConn.get_connection()
+        # First, verify the message belongs to the user
+        cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
+        message = cursor.fetchone()
+        if message and message[0] == user_id:  # Access receiver_id using index
+            # If the message belongs to the user, delete it
+            cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
+            conn.commit()
+            return jsonify({'success': 'Message deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Message not found or permission denied'}), 404
+    except Exception as e:
+        print(f"Error deleting message: {e}")
+        conn.rollback()
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
