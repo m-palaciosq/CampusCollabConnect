@@ -494,7 +494,7 @@ def inbox():
     try:
         conn, cursor = dbConn.get_connection()
         query = """
-        SELECT m.message_id, m.subject, m.content, m.is_read, u.firstName, u.lastName
+        SELECT m.message_id, m.subject, m.content, u.firstName as sender_first_name, u.lastName as sender_last_name
         FROM messages m
         JOIN users u ON m.sender_id = u.userID
         WHERE m.receiver_id = %s
@@ -505,15 +505,14 @@ def inbox():
             'message_id': row[0],
             'subject': row[1],
             'content': row[2],
-            'is_read': row[3],
-            'sender_name': f"{row[4]} {row[5]}"
+            'sender_name': f"{row[3]} {row[4]}"
         } for row in cursor.fetchall()]
-    except Exception as e:
+    except Error as e:
         flash("An error occurred while fetching messages.", "error")
-        print(f"An error occurred: {e}")
+        print(e)
         messages = []
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
