@@ -518,34 +518,45 @@ def inbox():
 
     return render_template('inbox.html', messages=messages)
 
-@app.route('/api/send_message', methods=['POST'])
+@app.route('/send_message', methods=['POST'])
 def send_message():
     if 'user_id' not in session:
-        return jsonify({'error': 'You must be logged in to send messages.'}), 401
+        flash('You must be logged in to send messages.')
+        return redirect(url_for('login'))
 
-    data = request.get_json()
-    receiver_id = data.get('receiver_id')
-    subject = data.get('subject')
-    content = data.get('content')
+    receiver_name = request.form.get('receiver_name')
+    subject = request.form.get('subject')
+    content = request.form.get('content')
 
-    if not receiver_id or not subject or not content:
-        return jsonify({'error': 'All fields are required.'}), 400
+    if not receiver_name or not subject or not content:
+        flash('All fields are required.')
+        return redirect(request.referrer)
 
     try:
         conn, cursor = dbConn.get_connection()
-        cursor.execute("INSERT INTO messages (sender_id, receiver_id, subject, content) VALUES (%s, %s, %s, %s)",
-                       (session['user_id'], receiver_id, subject, content))
-        conn.commit()
-    except Exception as e:
-        conn.rollback()
-        print(e)
-        return jsonify({'error': 'Failed to send message.'}), 500
-    finally:
-        if conn and conn.is_connected():
-            cursor.close()
-            conn.close()
+        # Find receiver ID by name
+        cursor.execute("SELECT userID FROM users WHERE CONCAT(firstName, ' ', lastName) = %s", (receiver_name,))
+        receiver = cursor.fetchone()
 
-    return jsonify({'success': 'Message sent successfully.'})
+        if receiver is None:
+            flash('No user found with that name.')
+            return redirect(request.referrer)
+
+        receiver_id = receiver[0]
+
+        query = "INSERT INTO messages (sender_id, receiver_id, subject, content) VALUES (%s, %s, %s, %s)"
+        cursor.execute(query, (session['user_id'], receiver_id, subject, content))
+        conn.commit()
+        flash('Message sent successfully.')
+    except Error as e:
+        flash('An error occurred while sending the message.')
+        print(e)
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for('inbox'))
+
 
 @app.route('/delete_message/<int:message_id>', methods=['POST'])
 def delete_message(message_id):
