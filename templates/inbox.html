@@ -13,11 +13,11 @@
         <a href="/dashboard" class="btn btn-secondary mt-3">Return to Dashboard</a>
         <div class="list-group mt-3">
             {% for message in messages %}
-            <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_id }}', '{{ message.content }}')">
-                <div><strong>From:</strong> {{ message.sender_id }} | <strong>Subject:</strong> {{ message.subject }}</div>
+            <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.firstName }} {{ message.lastName }}', '{{ message.content }}')">
+                <div><strong>From:</strong> {{ message.firstName }} {{ message.lastName }} | <strong>Subject:</strong> {{ message.subject }}</div>
                 <p>{{ message.content | truncate(100) }}</p>
             </a>
-            {% endfor %}
+            {% endfor %}            
         </div>
     </div>
 
