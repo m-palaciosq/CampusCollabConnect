@@ -547,6 +547,29 @@ def send_message():
 
     return jsonify({'success': 'Message sent successfully.'})
 
+@app.route('/delete_message/<int:message_id>', methods=['POST'])
+def delete_message(message_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        user_id = session['user_id']
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
+        message = cursor.fetchone()
+        if message and message['receiver_id'] == user_id:
+            cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
+            conn.commit()
+            return jsonify({'success': 'Message deleted'}), 200
+        else:
+            return jsonify({'error': 'Message not found or permission denied'}), 404
+    except Exception as e:
+        print(f"Error deleting message: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 
 
 @app.errorhandler(RequestEntityTooLarge)
