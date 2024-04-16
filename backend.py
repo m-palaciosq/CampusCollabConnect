@@ -486,21 +486,34 @@ def search():
 
 @app.route('/inbox')
 def inbox():
-    if 'user_id' not in session:
-        flash('Please log in to view your inbox.', 'info')
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in to view your inbox.", "info")
         return redirect(url_for('login'))
-
-    user_id = session['user_id']
+    
     try:
         conn, cursor = dbConn.get_connection()
-        cursor.execute("SELECT * FROM messages WHERE receiver_id = %s ORDER BY created_at DESC", (user_id,))
-        messages = cursor.fetchall()
+        query = """
+        SELECT m.message_id, m.subject, m.content, m.is_read, u.firstName, u.lastName
+        FROM messages m
+        JOIN users u ON m.sender_id = u.userID
+        WHERE m.receiver_id = %s
+        ORDER BY m.created_at DESC
+        """
+        cursor.execute(query, (user_id,))
+        messages = [{
+            'message_id': row[0],
+            'subject': row[1],
+            'content': row[2],
+            'is_read': row[3],
+            'sender_name': f"{row[4]} {row[5]}"
+        } for row in cursor.fetchall()]
     except Exception as e:
-        flash('An error occurred while fetching messages.', 'error')
-        print(e)
+        flash("An error occurred while fetching messages.", "error")
+        print(f"An error occurred: {e}")
         messages = []
     finally:
-        if conn and conn.is_connected():
+        if conn.is_connected():
             cursor.close()
             conn.close()
 
