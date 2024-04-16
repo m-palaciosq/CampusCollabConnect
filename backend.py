@@ -547,7 +547,6 @@ def send_message():
 
     return jsonify({'success': 'Message sent successfully.'})
 
-
 @app.route('/delete_message/<int:message_id>', methods=['POST'])
 def delete_message(message_id):
     if 'user_id' not in session:
@@ -557,6 +556,7 @@ def delete_message(message_id):
     try:
         user_id = session['user_id']
         conn, cursor = dbConn.get_connection()
+        # Check if the user is the receiver of the message
         cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
         message = cursor.fetchone()
 
@@ -568,18 +568,21 @@ def delete_message(message_id):
             flash("You are not authorized to delete this message.", "error")
             return redirect(url_for('inbox'))
 
+        # Perform the delete operation
         cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
         conn.commit()
         flash("Message deleted successfully.", "success")
     except Exception as e:
         conn.rollback()
-        flash(f"An error occurred while deleting the message: {e}", "error")
+        flash("An error occurred while deleting the message.", "error")
+        print(f"An error occurred: {e}")
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
     return redirect(url_for('inbox'))
+
 
 
 
