@@ -550,40 +550,29 @@ def send_message():
 @app.route('/delete_message/<int:message_id>', methods=['POST'])
 def delete_message(message_id):
     if 'user_id' not in session:
-        flash("You need to log in to delete messages.", "error")
-        return redirect(url_for('login'))
+        return jsonify({'error': 'Unauthorized'}), 401
 
     try:
         user_id = session['user_id']
         conn, cursor = dbConn.get_connection()
-        # Check if the user is the receiver of the message
+        # First, verify the message belongs to the user
         cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
         message = cursor.fetchone()
-
-        if message is None:
-            flash("Message not found.", "error")
-            return redirect(url_for('inbox'))
-
-        if message['receiver_id'] != user_id:
-            flash("You are not authorized to delete this message.", "error")
-            return redirect(url_for('inbox'))
-
-        # Perform the delete operation
-        cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
-        conn.commit()
-        flash("Message deleted successfully.", "success")
+        if message and message['receiver_id'] == user_id:
+            # If the message belongs to the user, delete it
+            cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
+            conn.commit()
+            return jsonify({'success': 'Message deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Message not found or permission denied'}), 404
     except Exception as e:
+        print(f"Error deleting message: {e}")
         conn.rollback()
-        flash("An error occurred while deleting the message.", "error")
-        print(f"An error occurred: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
     finally:
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-
-    return redirect(url_for('inbox'))
-
-
 
 
 
