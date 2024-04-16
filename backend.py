@@ -574,8 +574,6 @@ def delete_message(message_id):
             cursor.close()
             conn.close()
 
-
-
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
     flash('File too large. Please upload a file smaller than 16MB.')
