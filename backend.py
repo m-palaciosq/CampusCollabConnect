@@ -554,26 +554,31 @@ def delete_message(message_id):
         flash("You need to log in to delete messages.", "error")
         return redirect(url_for('login'))
 
+    user_id = session['user_id']
     try:
-        user_id = session['user_id']
         conn, cursor = dbConn.get_connection()
         cursor.execute("SELECT receiver_id FROM messages WHERE message_id = %s", (message_id,))
         message = cursor.fetchone()
         if not message:
             flash("Message not found.", "error")
+            print("No message with ID:", message_id)
             return redirect(url_for('inbox'))
+        
         if message['receiver_id'] != user_id:
             flash("You are not authorized to delete this message.", "error")
+            print("Unauthorized attempt to delete message by user:", user_id)
             return redirect(url_for('inbox'))
 
         cursor.execute("DELETE FROM messages WHERE message_id = %s", (message_id,))
         conn.commit()
         flash("Message deleted successfully.", "success")
+        print("Message deleted:", message_id)
     except Exception as e:
         conn.rollback()
         flash(f"An error occurred while deleting the message: {e}", "error")
+        print("Error deleting message:", e)
     finally:
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
             conn.close()
 
