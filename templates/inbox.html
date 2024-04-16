@@ -177,7 +177,7 @@
                 });
         });
 
-        function confirmDelete(messageId, event) {
+    function confirmDelete(messageId, event) {
     event.stopPropagation(); // Prevent the event from bubbling up to parent elements
     if (confirm("Are you sure you want to delete this message?")) {
         fetch('/delete_message/' + messageId, {
