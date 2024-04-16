@@ -70,9 +70,10 @@
         <button class="btn btn-primary" onclick="openNewMessageModal()">Send New Message</button>
         <div class="list-group mt-3">
             {% for message in messages %}
-            <a href="#" class="list-group-item list-group-item-action"
-                onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_name }}', '{{ message.content }}')">
-                <div><strong>From:</strong> {{ message.sender_name }} | <strong>Subject:</strong> {{ message.subject }}
+            <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_name }}', '{{ message.content }}')">
+                <div>
+                    <strong>From:</strong> {{ message.sender_name }} | <strong>Subject:</strong> {{ message.subject }}
+                    <span class="delete-btn" onclick="confirmDelete('{{ message.message_id }}', event)">🗑️</span>
                 </div>
                 <p>{{ message.content | truncate(100) }}</p>
             </a>
