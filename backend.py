@@ -573,6 +573,25 @@ def delete_message(message_id):
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
+            
+@app.route('/unread_messages_count')
+def unread_messages_count():
+    if 'user_id' not in session:
+        return jsonify(count=0)  # or handle unauthenticated scenario appropriately
+
+    user_id = session['user_id']
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT COUNT(*) FROM messages WHERE receiver_id = %s AND is_read = FALSE", (user_id,))
+        count = cursor.fetchone()[0]
+        return jsonify(count=count)
+    except Error as e:
+        print("Database error:", e)
+        return jsonify(count=0)
+    finally:
+        cursor.close()
+        conn.close()
+
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
