@@ -494,19 +494,22 @@ def inbox():
     try:
         conn, cursor = dbConn.get_connection()
         query = """
-        SELECT m.message_id, m.subject, m.content, u.firstName as sender_first_name, u.lastName as sender_last_name
+        SELECT m.message_id, m.subject, m.content, u.userID, u.firstName, u.lastName
         FROM messages m
         JOIN users u ON m.sender_id = u.userID
         WHERE m.receiver_id = %s
         ORDER BY m.created_at DESC
         """
         cursor.execute(query, (user_id,))
-        messages = [{
-            'message_id': row[0],
-            'subject': row[1],
-            'content': row[2],
-            'sender_name': f"{row[3]} {row[4]}"
-        } for row in cursor.fetchall()]
+        messages = []
+        for row in cursor.fetchall():
+            messages.append({
+                'message_id': row[0],
+                'subject': row[1],
+                'content': row[2],
+                'sender_id': row[3],
+                'sender_name': f"{row[4]} {row[5]}"
+            })
     except Error as e:
         flash("An error occurred while fetching messages.", "error")
         print(e)
