@@ -70,7 +70,7 @@
         <button class="btn btn-primary" onclick="openNewMessageModal()">Send New Message</button>
         <div class="list-group mt-3">
             {% for message in messages %}
-            <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_name }}', '{{ message.content }}')">
+            <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_name }}', '{{ message.sender_id }}', '{{ message.content }}')">
                 <div>
                     <strong>From:</strong> {{ message.sender_name }} | <strong>Subject:</strong> {{ message.subject }}
                     <span class="delete-btn" onclick="confirmDelete('{{ message.message_id }}', event)">🗑️</span>
@@ -83,7 +83,6 @@
     </div>
 
 
-    <!-- Modal for Reading Messages -->
     <div class="modal" id="readMessageModal" tabindex="-1" style="display:none;">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -93,6 +92,7 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>From:</strong> <span id="messageFrom"></span></p>
+                    <p><strong>User ID:</strong> <span id="messageFromId"></span></p> <!-- New element for displaying ID -->
                     <p><strong>Subject:</strong> <span id="messageSubject"></span></p>
                     <p id="messageContent"></p>
                 </div>
@@ -131,8 +131,9 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
     <script>
-        function openReadMessageModal(messageId, subject, name, content) {
+        function openReadMessageModal(messageId, subject, name, userId, content) {
             document.getElementById('messageFrom').textContent = name;
+            document.getElementById('messageFromId').textContent = userId;
             document.getElementById('messageSubject').textContent = subject;
             document.getElementById('messageContent').textContent = content;
             document.getElementById('readMessageModal').style.display = 'block';
