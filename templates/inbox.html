@@ -72,7 +72,7 @@
             {% for message in messages %}
             <a href="#" class="list-group-item list-group-item-action" onclick="openReadMessageModal('{{ message.message_id }}', '{{ message.subject }}', '{{ message.sender_name }}', '{{ message.sender_id }}', '{{ message.content }}')">
                 <div>
-                    <strong>From:</strong> {{ message.sender_name }} |<strong>User ID:</strong> {{ sender_id }}| <strong>Subject:</strong> {{ message.subject }}
+                    <strong>From:</strong> {{ message.sender_name }} | <strong>Subject:</strong> {{ message.subject }}
                     <span class="delete-btn" onclick="confirmDelete('{{ message.message_id }}', event)">🗑️</span>
                 </div>
                 <p>{{ message.content | truncate(100) }}</p>
@@ -92,7 +92,7 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>From:</strong> <span id="messageFrom"></span></p>
-                    <p><strong>ID:</strong> <span id="messageFromId"></span></p> <!-- New element for displaying ID -->
+                    <p><strong>User ID:</strong> <span id="messageFromId"></span></p> <!-- New element for displaying ID -->
                     <p><strong>Subject:</strong> <span id="messageSubject"></span></p>
                     <p id="messageContent"></p>
                 </div>
