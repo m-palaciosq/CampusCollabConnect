@@ -81,6 +81,16 @@
         .sign-out:hover {
             background-color: #ff3333;
         }
+        .notification-bubble {
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 8px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0.7em;
+}
     </style>
 </head>
 <body>
@@ -96,10 +106,37 @@
             <a href="/create" class="box">Create Posts</a>
             <a href="/manage_posts" class="box">Manage Posts</a>
             <a href="/search" class="box">Search Posts</a>
-            <a href="/inbox" class="box">Inbox</a> <!-- New button for accessing the inbox -->
+            <a href="/inbox" class="nav-link">
+                Inbox <span id="inbox-count" class="notification-bubble">0</span>
+              </a>
         </div>
         <a href="/sign_out" class="sign-out">Sign Out</a>
     </div>
+    <script>
+        function updateNotificationCounts() {
+            // Example AJAX request to your server to get notification counts
+            fetch('/api/notification_counts') // Make sure you have this API route implemented in your Flask app
+                .then(response => response.json())
+                .then(data => {
+                    const inboxCount = data.inbox;
+                    const inboxCountElement = document.getElementById('inbox-count');
+                    
+                    if (inboxCount > 0) {
+                        inboxCountElement.textContent = inboxCount;
+                        inboxCountElement.style.display = 'inline-block';
+                    } else {
+                        inboxCountElement.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error fetching notification counts:', error));
+        }
+        
+        // Call this function when the page loads
+        document.addEventListener('DOMContentLoaded', updateNotificationCounts);
+
+        // Optionally, call this function periodically if you want live updates
+        // setInterval(updateNotificationCounts, 30000); // 30 seconds interval
+    </script>
 
 </body>
 </html>

@@ -576,6 +576,40 @@ def delete_message(message_id):
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
+            
+@app.route('/unread_messages_count')
+def unread_messages_count():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    try:
+        conn, cursor = dbConn.get_connection()
+        cursor.execute("SELECT COUNT(*) FROM messages WHERE receiver_id = %s AND is_read = FALSE", (user_id,))
+        count = cursor.fetchone()[0]
+        return jsonify({'count': count})
+    except Error as e:
+        print("Error getting unread messages count:", e)
+        return jsonify({'error': 'Internal server error'}), 500
+    finally:
+        cursor.close()
+        conn.close()
+        
+        @app.route('/api/notification_counts')
+def notification_counts():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        # Replace the query with the actual query to count new messages
+        new_messages_count = ... # Your logic to count new messages
+        return jsonify({'inbox': new_messages_count})
+    except Exception as e:
+        print(f"Error getting notification counts: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_large_file_error(e):
