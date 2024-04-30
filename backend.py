@@ -17,14 +17,13 @@ def login():
         password = request.form['password']
         app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
 
-
-        user = authenticate_user(email, password)
+        user, error_msg = authenticate_user(email, password)
         
         if user:
             session['user_id'] = user['userID']
             return redirect(url_for('dashboard'))
         else:
-            flash("Invalid email or password", "error")
+            flash(error_msg, "error")
 
     return render_template('login.html')
 
@@ -32,25 +31,27 @@ def authenticate_user(email, password):
     try:
         conn, cursor = dbConn.get_connection()
 
-        cursor.execute("SELECT * FROM users WHERE email = %s AND p_word = %s", (email, password))
+        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
         user = cursor.fetchone()
 
         if user:
-            user_dict = {
-                'userID': user[0],
-                'email': user[1],
-                'p_word': user[2],
-                'firstName': user[3],
-                'lastName': user[4]
-            }
-            return user_dict
+            if user[2] == password:
+                user_dict = {
+                    'userID': user[0],
+                    'email': user[1],
+                    'p_word': user[2],
+                    'firstName': user[3],
+                    'lastName': user[4]
+                }
+                return user_dict, None
+            else:
+                return None, "Invalid password"
         else:
-            return None
+            return None, "User with this email does not exist"
 
     except Error as e:
         print("Error while connecting to MySQL", e)
-        flash("Error occurred while connecting to the database", "error")
-        return None
+        return None, "Error occurred while connecting to the database"
 
     finally:
         if conn.is_connected():
@@ -85,8 +86,21 @@ def create_account():
     password = request.form['password']
     first_name = request.form['firstName']
     last_name = request.form['lastName']
+    
+    if not email.lower().endswith("@uncg.edu"):
+        flash("Email must end with @uncg.edu", "error")
+        return redirect(url_for('account_creation_form'))
+
     result = create_user(email, password, first_name, last_name)
-    return result
+    if result == "Email already exists":
+        flash(result, "error")
+    elif result == "Error occurred":
+        flash("An error occurred while creating your account", "error")
+    else:
+        flash("Account created successfully. You can now login.", "success")
+        return redirect(url_for('login'))
+
+    return redirect(url_for('account_creation_form'))
 
 @app.route('/create', methods=['GET', 'POST'])
 def create_project():

@@ -87,6 +87,19 @@
 <body>
     <div id="login-container">
         <h2>Welcome to Campus Collab Connect</h2>
+        
+        {% if request.method == 'POST' %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="error-message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        {% endif %}
+
         <form method="POST" action="/login">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required><br>
