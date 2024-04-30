@@ -11,13 +11,10 @@
             margin: 20px;
         }
 
-        /* Notification Styles */
         #notification {
             display: none;
-            /* Hidden by default */
             position: fixed;
             top: 20px;
-            /* Show at the top */
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
@@ -40,7 +37,6 @@
             background-color: #dff0d8;
             border-color: #d6e9c6;
         }
-
 
         .search-container,
         .navigation-container,
@@ -72,7 +68,6 @@
             display: inline-block;
         }
 
-
         .search-button,
         .filter-button {
             background-color: #007bff;
@@ -88,7 +83,6 @@
             opacity: 0.9;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -124,7 +118,6 @@
             cursor: pointer;
         }
 
-        /* Use a grid layout for the container */
         #search-results {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -142,9 +135,9 @@
             padding: 10px;
         }
 
-        @media (max-width: 768px) { /* Adjust the max-width as per your requirement */
+        @media (max-width: 768px) {
         #search-results {
-        grid-template-columns: 1fr; /* Stack them on smaller screens */
+        grid-template-columns: 1fr;
             }
         }
 
@@ -167,13 +160,11 @@
 
 <body>
 
-    <!-- Combined Search and Filter Form -->
     <form id="searchForm" action="/search" method="get">
         <input type="text" class="search-input" name="search" placeholder="Search job posts...">
         <button type="submit" class="search-button">Search</button>
         <a href="{{ url_for('dashboard') }}" class="back-button">Return to Dashboard</a>
     </form>
-
 
     <div id="search-results">
         {% for post in job_posts %}
@@ -191,7 +182,6 @@
         {% endfor %}
     </div>
 
-    <!-- Job Post Details Modal -->
     <div id="jobPostDetailsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeJobPostDetailsModal()">&times;</span>
@@ -217,9 +207,7 @@
     </div>
 
     <script>
-        // Function to open the job post details in a modal
         function openJobPostDetailsModal(element) {
-            // Get data from the clicked post container
             const postContainer = element.closest('.post-container');
             const postId = postContainer.getAttribute('data-post-id');
             const title = element.innerText;
@@ -227,25 +215,20 @@
             const tasks = postContainer.dataset.tasks;
             const requirements = postContainer.dataset.requirements;
 
-            // Update modal content with the job post details
             document.getElementById('jobPostTitle').innerText = title;
             document.getElementById('jobPostDescription').innerText = description;
             document.getElementById('jobPostTasks').innerText = tasks;
             document.getElementById('jobPostRequirements').innerText = requirements;
 
-            // Set the value for the hidden postID input in the resume submission form
             document.getElementById('jobPostIdForResume').value = postId;
 
-            // Display the modal
             document.getElementById('jobPostDetailsModal').style.display = "block";
         }
 
-        // Function to close the job post details modal
         function closeJobPostDetailsModal() {
             document.getElementById('jobPostDetailsModal').style.display = "none";
         }
 
-        // Function to show notification
         function showNotification() {
             var notification = document.getElementById('notification');
             notification.style.display = 'block';
@@ -254,52 +237,42 @@
             }, 5000);
         }
 
-
-        // Add a keypress event listener to the search input field
         document.querySelector('.search-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
-                // Prevent the form from being submitted on 'Enter' keypress
                 event.preventDefault();
-                // Trigger the search functionality
                 search();
             }
         });
 
         document.getElementById('resumeSubmissionForm').addEventListener('submit', function (e) {
-            e.preventDefault(); // Prevent the default form submission
+            e.preventDefault();
 
-            var formData = new FormData(this); // 'this' refers to the form
-            var xhr = new XMLHttpRequest(); // Create a new XMLHttpRequest for AJAX
+            var formData = new FormData(this); 
+            var xhr = new XMLHttpRequest(); 
 
-            xhr.open("POST", "/submit_resume"); // Configure the request to the submit_resume route, adjust if the URL is different
+            xhr.open("POST", "/submit_resume"); 
             xhr.onload = function () {
                 if (xhr.status === 200) {
-                    // If the request is successful, show the notification
                     showNotification('Resume uploaded successfully');
-                    // Optionally, redirect the user or clear the form
                     setTimeout(function () {
-                        window.location.href = "{{ url_for('dashboard') }}"; // Redirect after showing the notification
-                    }, 1000); // Adjust time as needed
+                        window.location.href = "{{ url_for('dashboard') }}"; 
+                    }, 1000);
                 } else {
-                    // Handle error (optional)
                     alert("An error occurred while submitting the resume.");
                 }
             };
-            xhr.send(formData); // Send the form data
+            xhr.send(formData);
         });
 
         function showNotification(message) {
             var notification = document.getElementById('notification');
-            notification.textContent = message; // Set the text of the notification
-            notification.style.display = 'block'; // Show the notification
-            // Hide the notification after 5 seconds
+            notification.textContent = message;
+            notification.style.display = 'block';
             setTimeout(function () {
                 notification.style.display = 'none';
             }, 5000);
         }
 
-
-        // Function to perform the search
         function search() {
             const searchTerm = document.querySelector('.search-input').value.toLowerCase();
             const jobPosts = document.querySelectorAll('.post-container');
@@ -307,7 +280,6 @@
             jobPosts.forEach(function (postContainer) {
                 const postTitle = postContainer.querySelector('.post-title').textContent.toLowerCase();
 
-                // Display only the posts that match the search term
                 if (postTitle.includes(searchTerm)) {
                     postContainer.style.display = 'block';
                 } else {
@@ -317,8 +289,6 @@
         }
     </script>
     <div id="notification">Resume uploaded successfully!</div>
-
-
 
 </body>
 

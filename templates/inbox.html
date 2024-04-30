@@ -92,7 +92,7 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>From:</strong> <span id="messageFrom"></span></p>
-                    <p><strong>User ID:</strong> <span id="messageFromId"></span></p> <!-- New element for displaying ID -->
+                    <p><strong>User ID:</strong> <span id="messageFromId"></span></p> 
                     <p><strong>Subject:</strong> <span id="messageSubject"></span></p>
                     <p id="messageContent"></p>
                 </div>
@@ -100,7 +100,6 @@
         </div>
     </div>
 
-    <!-- Modal for Sending Messages -->
     <div class="modal" id="newMessageModal" tabindex="-1" style="display:none;">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -139,7 +138,6 @@
             document.getElementById('readMessageModal').style.display = 'block';
         }
 
-
         function closeReadMessageModal() {
             document.getElementById('readMessageModal').style.display = 'none';
         }
@@ -158,8 +156,6 @@
             const subject = document.getElementById('messageSubjectInput').value;
             const content = document.getElementById('messageContentInput').value;
 
-            // Perform AJAX request to send the message
-            // Assume the backend route /api/send_message is set up to handle POST requests
             fetch('/api/send_message', {
                 method: 'POST',
                 headers: {
@@ -179,20 +175,20 @@
         });
 
     function confirmDelete(messageId, event) {
-    event.stopPropagation(); // Prevent the event from bubbling up to parent elements
+    event.stopPropagation(); 
     if (confirm("Are you sure you want to delete this message?")) {
         fetch('/delete_message/' + messageId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: '_method=DELETE' // For frameworks that require it
+            body: '_method=DELETE' 
         }).then(response => {
             if (!response.ok) throw new Error('Failed to delete the message.');
-            return response.text(); // Assuming the response is not JSON
+            return response.text(); 
         }).then(() => {
             alert('Message deleted successfully.');
-            location.reload(); // Reload the page to reflect changes
+            location.reload(); 
         }).catch(error => {
             console.error('Error:', error);
             alert('Error: ' + error.message);
